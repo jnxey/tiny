@@ -11,7 +11,7 @@ export default {
   plugins: [
     typescript(),
     alias({
-      entries: [{ find: '@', replacement: './src' }]
+      entries: [{ find: '@', replacement: '../src' }]
     })
   ]
 };

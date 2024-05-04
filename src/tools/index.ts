@@ -1,18 +1,19 @@
 /**
  * 判断数据类型
  */
-export const getType = (obj: any): string => Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
-export const isNumber = (obj: any): boolean => getType(obj) === 'number';
-export const isString = (obj: any): boolean => getType(obj) === 'string';
-export const isArray = (obj: any): boolean => getType(obj) === 'array';
-export const isObject = (obj: any): boolean => getType(obj) === 'object';
-export const isBoolean = (obj: any): boolean => getType(obj) === 'boolean';
-export const isFunction = (obj: any): boolean => getType(obj).toLowerCase().indexOf('function') > -1;
-export const isNull = (obj: any): boolean => getType(obj) === 'null';
-export const isUndefined = (obj: any): boolean => getType(obj) === 'undefined';
-export const isPromise = (obj: any): boolean => getType(obj) === 'promise';
-export const isNode = (node: any): boolean => !isNull(node) && !isUndefined(node) && Boolean(node.nodeName) && Boolean(node.nodeType);
-export const isElement = (element: any): boolean => isNode(element) && element.nodeType === 1;
+export const getType = (value: any): string => Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
+export const isNumber = (value: any): boolean => getType(value) === 'number';
+export const isString = (value: any): boolean => getType(value) === 'string';
+export const isArray = (value: any): boolean => getType(value) === 'array';
+export const isObject = (value: any): boolean => getType(value) === 'object';
+export const isBoolean = (value: any): boolean => getType(value) === 'boolean';
+export const isFunction = (value: any): boolean => getType(value).toLowerCase().indexOf('function') > -1;
+export const isNull = (value: any): boolean => getType(value) === 'null';
+export const isUndefined = (value: any): boolean => getType(value) === 'undefined';
+export const isPromise = (value: any): boolean => getType(value) === 'promise';
+export const isNode = (value: any): boolean => !isNull(value) && !isUndefined(value) && Boolean(value.nodeName) && Boolean(value.nodeType);
+export const isElement = (value: any): boolean => isNode(value) && value.nodeType === 1;
+export const isEmpty = (value: any): boolean => value === undefined || value === '' || value === null;
 
 /**
  * 校验数据类型
