@@ -2,8 +2,15 @@
   "name": "tiny",
   "version": "1.0.0",
   "description": "A simple node service framework",
-  "main": "index.js",
+  "main": "dist/tiny.js",
+  "module": "dist/tiny.js",
   "type": "module",
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "rollup -c scripts/build.js"
   },
