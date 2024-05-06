@@ -21,9 +21,9 @@ export class Controller {
   /*
    * 连接控制器
    */
-  public static connect(instance: Function, router: Router): void {
+  public static connect<T>(instance: T, router: Router): void {
     const constructorName = 'constructor';
-    const constructor = instance.constructor;
+    const constructor = instance[constructorName];
     const connector = '/';
     const moduleName: string = constructor.name;
     const methods: string[] = Object.getOwnPropertyNames(constructor.prototype);

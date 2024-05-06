@@ -33,7 +33,7 @@ export class Jwt {
    */
   public static verify<T>(ctx: ExtendableContext): T | null {
     const token = Jwt.options.getToken(ctx);
-    if (!token) return;
+    if (!token) return null;
     try {
       return jsonwebtoken.verify(token, Jwt.options.privateKey);
     } catch (err) {

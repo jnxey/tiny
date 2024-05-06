@@ -34,10 +34,10 @@ export enum DataType {
 /*
  * 参数来源
  */
-export const ParamsSource = {
-  query: 'query',
-  body: 'body'
-};
+export enum ParamsSource {
+  query,
+  body
+}
 
 /*
  * 参数数据类型

@@ -19,7 +19,9 @@ import {
 } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
-import { InitOptions } from '@/types';
+import { InitOptions, InitOutput } from '@/types';
+import Koa from 'koa';
+import Router from '@koa/router';
 
 const Tiny = {
   // Controller
@@ -50,9 +52,13 @@ const Tiny = {
   Required,
   TypeError,
   // 初始化
-  init(optioins: InitOptions) {
-    if (optioins.controller) Controller.init(optioins.controller);
-    if (optioins.jwt) Jwt.init(optioins.jwt);
+  init(options: InitOptions): InitOutput {
+    if (options.controller) Controller.init(options.controller);
+    if (options.jwt) Jwt.init(options.jwt);
+    return {
+      app: new Koa(),
+      router: new Router()
+    };
   }
 };
 
