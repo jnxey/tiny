@@ -69,8 +69,7 @@ export function Protected(): Function {
         ctx.payload = payload;
         return func.apply(this, args);
       } else {
-        ctx.req.statusCode = Jwt.options.errorCode;
-        return next();
+        ctx.throw(Jwt.options.errorCode);
       }
     };
   };

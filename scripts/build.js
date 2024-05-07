@@ -1,5 +1,8 @@
 import alias from '@rollup/plugin-alias';
 import typescript from '@rollup/plugin-typescript';
+import { resolve } from 'path';
+
+const rootDir = process.cwd();
 
 export default {
   input: 'src/index.ts',
@@ -11,7 +14,7 @@ export default {
   plugins: [
     typescript(),
     alias({
-      entries: [{ find: '@', replacement: '../src' }]
+      entries: [{ find: '@', replacement: resolve(rootDir, 'src') }]
     })
   ]
 };

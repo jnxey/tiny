@@ -4,8 +4,6 @@ import { resolve } from 'path';
 
 const rootDir = process.cwd();
 
-console.log(rootDir, '-----');
-
 export default {
   input: 'types/index.d.ts',
   output: {

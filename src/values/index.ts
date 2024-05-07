@@ -58,5 +58,6 @@ export const ParamsConfigCache = 'PARAMS_CONFIG_CACHE';
  */
 export const StatusCode = {
   paramsError: 400,
-  authError: 408
+  authError: 408,
+  serveError: 500
 };

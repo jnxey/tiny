@@ -18,13 +18,19 @@ import {
   VndApiJson
 } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
+import { Dto } from '@/dto';
 import { Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
-import { InitOptions, InitOutput } from '@/types';
-import Koa from 'koa';
-import Router from '@koa/router';
+import { InitOptions } from '@/types';
 
-const Tiny = {
-  // Controller
+class Tiny {
+  // 初始化
+  public static init(options: InitOptions): void {
+    if (options.controller) Controller.init(options.controller);
+    if (options.jwt) Jwt.init(options.jwt);
+  }
+}
+
+export {
   Controller,
   Get,
   Delete,
@@ -45,21 +51,14 @@ const Tiny = {
   // jwt
   Jwt,
   Protected,
+  // dto
+  Dto,
   // params
   ParamsModel,
   ParamsModelResult,
   Declare,
   Required,
-  TypeError,
-  // 初始化
-  init(options: InitOptions): InitOutput {
-    if (options.controller) Controller.init(options.controller);
-    if (options.jwt) Jwt.init(options.jwt);
-    return {
-      app: new Koa(),
-      router: new Router()
-    };
-  }
+  TypeError
 };
 
 export default Tiny;

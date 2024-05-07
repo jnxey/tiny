@@ -19,9 +19,7 @@ export function Params<T extends ParamsModel>(params: { new (): T }, type: Param
         ctx.params = _params;
         return func.apply(this, args);
       } else {
-        ctx.req.statusCode = StatusCode.paramsError;
-        ctx.req.statusMessage = result.message;
-        return next();
+        ctx.throw(StatusCode.paramsError, result.message);
       }
     };
   };

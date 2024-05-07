@@ -3,7 +3,7 @@ import { koaBody } from 'koa-body';
 import { ExtendableContext, Next } from 'koa';
 import { isObject, kebabCase, syncObjectData } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerOptionsInput } from '@/controller/types';
-import { MethodType, DataType } from '@/values';
+import { MethodType, DataType, StatusCode } from '@/values';
 import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 
 export class Controller {
@@ -42,8 +42,7 @@ export class Controller {
         try {
           return handler(ctx, next);
         } catch (err: Error | any) {
-          /// ToDo: 收集错误信息
-          if (err instanceof Error) console.log(err.stack?.toString(), 'err-----------1');
+          ctx.throw(StatusCode.serveError, String(err.message));
         }
       };
       if (instance[name].METHOD === MethodType.get) {
