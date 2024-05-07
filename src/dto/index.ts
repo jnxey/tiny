@@ -1,4 +1,4 @@
-import { DtoInput } from '@/types/dto';
+import { DtoInput } from '@/dto/types';
 
 /*
  * Response返回码

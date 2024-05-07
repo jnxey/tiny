@@ -1,4 +1,4 @@
-import Koa, { ExtendableContext } from 'koa';
+import Koa from 'koa';
 import { Files } from 'formidable';
 
 declare module 'koa' {

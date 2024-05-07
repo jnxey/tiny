@@ -2,7 +2,7 @@ import Router from '@koa/router';
 import { koaBody } from 'koa-body';
 import { ExtendableContext, Next } from 'koa';
 import { isObject, kebabCase, syncObjectData } from '@/tools';
-import { ControllerHandler, ControllerOptions, ControllerOptionsInput } from '@/types/controller';
+import { ControllerHandler, ControllerOptions, ControllerOptionsInput } from '@/controller/types';
 import { MethodType, DataType } from '@/values';
 import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 

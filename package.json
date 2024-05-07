@@ -11,12 +11,15 @@
     "README.md",
     "package.json"
   ],
-  "types": "./lib/types/src/index.d.ts",
+  "types": "./lib/tiny.d.ts",
   "exports": {
     ".": "./lib/tiny.js"
   },
   "scripts": {
-    "build": "rollup -c scripts/build.js"
+    "types": "tsc --declaration --emitDeclarationOnly --outDir types",
+    "build": "npm run build:bundle && npm run build:types",
+    "build:bundle": "rollup -c scripts/build.js",
+    "build:types": "rollup -c scripts/types.js"
   },
   "repository": {
     "type": "git",
@@ -36,6 +39,7 @@
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
     "rollup": "^4.16.4",
+    "rollup-plugin-dts": "^6.1.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5"

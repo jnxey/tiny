@@ -1,5 +1,5 @@
-import typescript from '@rollup/plugin-typescript';
 import alias from '@rollup/plugin-alias';
+import typescript from '@rollup/plugin-typescript';
 
 export default {
   input: 'src/index.ts',
@@ -9,11 +9,7 @@ export default {
     name: 'Tiny'
   },
   plugins: [
-    typescript({
-      declaration: true,
-      composite: true,
-      declarationDir: 'lib/types'
-    }),
+    typescript(),
     alias({
       entries: [{ find: '@', replacement: '../src' }]
     })

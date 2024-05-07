@@ -1,6 +1,6 @@
 import { isObject, syncObjectData } from '@/tools';
 import jsonwebtoken from 'jsonwebtoken';
-import { JwtOptions, JwtOptionsInput } from '@/types/jwt';
+import { JwtOptions, JwtOptionsInput } from '@/jwt/types';
 import { ExtendableContext, Next } from 'koa';
 import { StatusCode } from '@/values';
 
