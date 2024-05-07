@@ -17,7 +17,7 @@
   },
   "scripts": {
     "types": "tsc --declaration --emitDeclarationOnly --outDir types",
-    "build": "npm run build:bundle && npm run build:types",
+    "build": "npm run types && npm run build:bundle && npm run build:types",
     "build:bundle": "rollup -c scripts/build.js",
     "build:types": "rollup -c scripts/types.js"
   },
