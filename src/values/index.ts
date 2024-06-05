@@ -6,6 +6,7 @@ export enum MethodType {
   delete,
   post,
   put,
+  param,
   view
 }
 
