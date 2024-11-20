@@ -1,7 +1,7 @@
 import { isObject, syncObjectData } from '@/tools';
 import jsonwebtoken from 'jsonwebtoken';
 import { JwtOptions, JwtOptionsInput } from '@/jwt/types';
-import { ExtendableContext, Next } from 'koa';
+import { ExtendableContext } from 'koa';
 import { StatusCode } from '@/values';
 
 /// Jwt构造函数
@@ -9,7 +9,7 @@ export class Jwt {
   public static options: JwtOptions = {
     privateKey: 'shared-secret',
     algorithms: 'HS256',
-    expiresIn: '4h',
+    expiresIn: '24h',
     ignoreExpiration: false,
     errorCode: StatusCode.authError,
     tokenKey: 'token',
@@ -18,7 +18,8 @@ export class Jwt {
     },
     setToken: function (ctx: ExtendableContext, value: string) {
       return ctx.cookies.set(Jwt.options.tokenKey, value);
-    }
+    },
+    isResetToken: () => false
   };
 
   /*
@@ -63,10 +64,12 @@ export function Protected(): Function {
     descriptor.value = function (): any {
       const args = arguments;
       const ctx: ExtendableContext = args[0];
-      const next: Next = args[1];
       const payload = Jwt.verify(ctx);
       if (payload) {
         ctx.payload = payload;
+        if (Jwt.options.isResetToken(ctx)) {
+          Jwt.sign(ctx, payload);
+        }
         return func.apply(this, args);
       } else {
         ctx.throw(Jwt.options.errorCode);
