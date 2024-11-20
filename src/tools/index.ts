@@ -62,6 +62,6 @@ export function getJSON(value?: string, def?: any) {
  */
 export function syncObjectData(target: object, remote: object) {
   Object.keys(target).forEach(function (name: string) {
-    target[name] = remote[name];
+    if (remote[name] !== undefined) target[name] = remote[name];
   });
 }
