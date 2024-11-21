@@ -1,32 +1,30 @@
+/// <reference types="koa__router" />
 import Router from '@koa/router';
 import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 import { ExtendableContext } from 'koa';
 
 declare enum MethodType {
-    get = 0,
-    delete = 1,
-    post = 2,
-    put = 3,
-    view = 4
+    get = "get",
+    delete = "delete",
+    post = "post",
+    put = "put",
+    view = "view"
 }
 declare enum DataType {
-    json = 0,
-    text = 1,
-    formUrlencoded = 2,
-    formData = 3,
-    jsonPatchJson = 4,
-    vndApiJson = 5,
-    cspReport = 6,
-    other = 7
+    json = "application/json",
+    text = "text/plain",
+    formUrlencoded = "application/x-www-form-urlencoded",
+    formData = "multipart/form-data",
+    other = "other"
 }
 declare enum ParamsSource {
-    query = 0,
-    body = 1
+    query = "query",
+    body = "body"
 }
 declare enum ParamsType {
-    number = 0,
-    boolean = 1,
-    string = 2
+    number = "number",
+    boolean = "boolean",
+    string = "string"
 }
 declare const ParamsConfigCache = "PARAMS_CONFIG_CACHE";
 declare const StatusCode: {
@@ -47,6 +45,7 @@ type ControllerOptionsInput = {
 declare class Controller {
     static options: ControllerOptions;
     static jwtProtectedList: string[];
+    static apiInfoJson: object[];
     static init(options: ControllerOptionsInput): void;
     static connect<T>(instance: T, router: Router): void;
 }
@@ -59,9 +58,6 @@ declare function Json(options?: Partial<KoaBodyMiddlewareOptions>): Function;
 declare function Text(options?: Partial<KoaBodyMiddlewareOptions>): Function;
 declare function FormUrlencoded(options?: Partial<KoaBodyMiddlewareOptions>): Function;
 declare function FormData(options?: Partial<KoaBodyMiddlewareOptions>): Function;
-declare function JsonPatchJson(options?: Partial<KoaBodyMiddlewareOptions>): Function;
-declare function VndApiJson(options?: Partial<KoaBodyMiddlewareOptions>): Function;
-declare function CspReport(options?: Partial<KoaBodyMiddlewareOptions>): Function;
 declare function Other(): Function;
 declare function Prefix(text: string): Function;
 declare function Mapping(path: string): Function;
@@ -113,13 +109,17 @@ declare class Dto {
 
 declare function Params<T extends ParamsModel>(params: {
     new (): T;
-}, type: ParamsSource): Function;
+}, type: ParamsSource, validate?: boolean): Function;
+declare function Result<T extends ParamsModel>(result: {
+    new (): T;
+}): Function;
 declare class ParamsModel {
     static def: {
         number: number;
         boolean: boolean;
         string: string;
     };
+    getConfigCache(): any;
     fill<T>(map: object): ParamsModelResult;
 }
 declare class ParamsModelResult {
@@ -149,4 +149,4 @@ declare class Tiny {
     static init(options: InitOptions): void;
 }
 
-export { Controller, CspReport, DataType, Declare, Delete, Dto, FormData, FormUrlencoded, Get, Json, JsonPatchJson, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, StatusCode, Summary, Text, TypeError, View, VndApiJson, Tiny as default };
+export { Controller, DataType, Declare, Delete, Dto, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, Summary, Text, TypeError, View, Tiny as default };

@@ -21,4 +21,6 @@ export interface ControllerHandler {
   SUMMARY?: string;
   JWT_PROTECTED?: boolean;
   DATA_TYPE_OPTIONS?: Partial<KoaBodyMiddlewareOptions>;
+  PARAMS_MODEL?: object;
+  RESULT_MODEL?: object;
 }

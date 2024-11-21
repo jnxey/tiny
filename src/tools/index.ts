@@ -65,3 +65,12 @@ export function syncObjectData(target: object, remote: object) {
     if (remote[name] !== undefined) target[name] = remote[name];
   });
 }
+
+/**
+ *  复制方法的属性给新的方法
+ */
+export function copyAttrToNew(fn1: Function, fn2: Function) {
+  Object.keys(fn2).forEach(function (name: string) {
+    fn1[name] = fn2[name];
+  });
+}

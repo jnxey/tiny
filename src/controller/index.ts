@@ -14,6 +14,8 @@ export class Controller {
 
   public static jwtProtectedList: string[] = [];
 
+  public static apiInfoJson: object[] = [];
+
   public static init(options: ControllerOptionsInput) {
     if (isObject(options)) syncObjectData(Controller.options, options);
   }
@@ -45,19 +47,31 @@ export class Controller {
           ctx.throw(StatusCode.serveError, String(err.message));
         }
       };
-      if (instance[name].METHOD === MethodType.get) {
+      if (handler.METHOD === MethodType.get) {
         router.get(path, interceptor);
-      } else if (instance[name].METHOD === MethodType.delete) {
+      } else if (handler.METHOD === MethodType.delete) {
         router.del(path, interceptor);
       } else if (handler.METHOD === MethodType.post) {
-        if (instance[name].DATA_TYPE === DataType.other) router.post(path, interceptor);
+        //
+        if (handler.DATA_TYPE === DataType.other) router.post(path, interceptor);
         else router.post(path, koaBody(handler.DATA_TYPE_OPTIONS), interceptor);
       } else if (handler.METHOD === MethodType.put) {
-        if (instance[name].DATA_TYPE === DataType.other) router.put(path, interceptor);
+        //
+        if (handler.DATA_TYPE === DataType.other) router.put(path, interceptor);
         else router.put(path, koaBody(handler.DATA_TYPE_OPTIONS), interceptor);
-      } else if (instance[name].METHOD === MethodType.view) {
+      } else if (handler.METHOD === MethodType.view) {
         router.get(path, interceptor);
       }
+      // 以下是接口信息
+      Controller.apiInfoJson.push({
+        module: module,
+        path: path,
+        method: handler.METHOD,
+        dataType: handler.DATA_TYPE,
+        summary: handler.SUMMARY,
+        paramsModel: handler.PARAMS_MODEL,
+        resultModel: handler.RESULT_MODEL
+      });
     });
   }
 }
@@ -148,37 +162,7 @@ export function FormData(options?: Partial<KoaBodyMiddlewareOptions>): Function 
 }
 
 /*
- * body的数据结构为JsonPatchJson
- */
-export function JsonPatchJson(options?: Partial<KoaBodyMiddlewareOptions>): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.jsonPatchJson;
-    descriptor.value.DATA_TYPE_OPTIONS = options;
-  };
-}
-
-/*
- * body的数据结构为VndApiJson
- */
-export function VndApiJson(options?: Partial<KoaBodyMiddlewareOptions>): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.vndApiJson;
-    descriptor.value.DATA_TYPE_OPTIONS = options;
-  };
-}
-
-/*
- * body的数据结构为CspReport
- */
-export function CspReport(options?: Partial<KoaBodyMiddlewareOptions>): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.cspReport;
-    descriptor.value.DATA_TYPE_OPTIONS = options;
-  };
-}
-
-/*
- * body的数据结构为Form表单
+ * body的数据结构为other
  */
 export function Other(): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {

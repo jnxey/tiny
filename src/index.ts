@@ -1,25 +1,7 @@
-import {
-  Controller,
-  CspReport,
-  Delete,
-  FormData,
-  FormUrlencoded,
-  Get,
-  Json,
-  JsonPatchJson,
-  Mapping,
-  Other,
-  Post,
-  Prefix,
-  Put,
-  Summary,
-  Text,
-  View,
-  VndApiJson
-} from '@/controller';
+import { Controller, Delete, FormData, FormUrlencoded, Get, Json, Mapping, Other, Post, Prefix, Put, Summary, Text, View } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Dto } from '@/dto';
-import { Params, Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
+import { Params, Result, Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ParamsConfigCache, StatusCode } from '@/values';
 
@@ -42,9 +24,6 @@ export {
   Text,
   FormUrlencoded,
   FormData,
-  JsonPatchJson,
-  VndApiJson,
-  CspReport,
   Other,
   Prefix,
   Mapping,
@@ -56,6 +35,7 @@ export {
   Dto,
   // params
   Params,
+  Result,
   ParamsModel,
   ParamsModelResult,
   Declare,

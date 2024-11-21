@@ -1,14 +1,16 @@
 import { ParamsConfigCache, ParamsSource, ParamsType, StatusCode } from '@/values';
-import { isBoolean, isEmpty, isString } from '@/tools';
+import { copyAttrToNew, isBoolean, isEmpty, isString } from '@/tools';
 import { ExtendableContext } from 'koa';
 
 /*
  * 参数模型
  */
-export function Params<T extends ParamsModel>(params: { new (): T }, type: ParamsSource): Function {
+export function Params<T extends ParamsModel>(params: { new (): T }, type: ParamsSource, validate: boolean = true): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const func: Function = descriptor.value;
     const _params = new params();
+    descriptor.value.PARAMS_MODEL = _params.getConfigCache();
+    if (!validate) return;
     descriptor.value = function (): any {
       const args = arguments;
       const ctx: ExtendableContext = args[0];
@@ -21,6 +23,17 @@ export function Params<T extends ParamsModel>(params: { new (): T }, type: Param
         ctx.throw(StatusCode.paramsError, result.message);
       }
     };
+    copyAttrToNew(descriptor.value, func);
+  };
+}
+
+/*
+ * 结果模型
+ */
+export function Result<T extends ParamsModel>(result: { new (): T }): Function {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const _result = new result();
+    descriptor.value.RESULT_MODEL = _result.getConfigCache();
   };
 }
 
@@ -34,6 +47,11 @@ export class ParamsModel {
     boolean: true,
     string: ''
   };
+
+  // 获取config
+  public getConfigCache() {
+    return this.constructor[ParamsConfigCache];
+  }
 
   // 填充
   public fill<T>(map: object) {

@@ -1,4 +1,4 @@
-import { isObject, syncObjectData } from '@/tools';
+import { copyAttrToNew, isObject, syncObjectData } from '@/tools';
 import jsonwebtoken from 'jsonwebtoken';
 import { JwtOptions, JwtOptionsInput } from '@/jwt/types';
 import { ExtendableContext } from 'koa';
@@ -75,5 +75,6 @@ export function Protected(): Function {
         ctx.throw(Jwt.options.errorCode);
       }
     };
+    copyAttrToNew(descriptor.value, func);
   };
 }
