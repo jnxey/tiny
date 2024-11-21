@@ -2,11 +2,38 @@ import Router from '@koa/router';
 import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 import { ExtendableContext } from 'koa';
 
+declare enum MethodType {
+    get = 0,
+    delete = 1,
+    post = 2,
+    put = 3,
+    view = 4
+}
+declare enum DataType {
+    json = 0,
+    text = 1,
+    formUrlencoded = 2,
+    formData = 3,
+    jsonPatchJson = 4,
+    vndApiJson = 5,
+    cspReport = 6,
+    other = 7
+}
+declare enum ParamsSource {
+    query = 0,
+    body = 1
+}
 declare enum ParamsType {
     number = 0,
     boolean = 1,
     string = 2
 }
+declare const ParamsConfigCache = "PARAMS_CONFIG_CACHE";
+declare const StatusCode: {
+    paramsError: number;
+    authError: number;
+    serveError: number;
+};
 
 type ControllerOptions = {
     prefix: string;
@@ -49,6 +76,7 @@ type JwtOptions = {
     tokenKey: string;
     getToken: (ctx: ExtendableContext) => string | undefined;
     setToken: (ctx: ExtendableContext, value: string) => any;
+    isResetToken: (ctx: ExtendableContext) => boolean;
 };
 type JwtOptionsInput = {
     privateKey?: string;
@@ -59,6 +87,7 @@ type JwtOptionsInput = {
     tokenKey?: string;
     getToken?: (ctx: ExtendableContext) => string | undefined;
     setToken?: (ctx: ExtendableContext, value: string) => any;
+    isResetToken?: (ctx: ExtendableContext) => boolean;
 };
 
 declare class Jwt {
@@ -117,4 +146,4 @@ declare class Tiny {
     static init(options: InitOptions): void;
 }
 
-export { Controller, CspReport, Declare, Delete, Dto, FormData, FormUrlencoded, Get, Json, JsonPatchJson, Jwt, Mapping, Other, ParamsModel, ParamsModelResult, Post, Prefix, Protected, Put, Required, Summary, Text, TypeError, View, VndApiJson, Tiny as default };
+export { Controller, CspReport, DataType, Declare, Delete, Dto, FormData, FormUrlencoded, Get, Json, JsonPatchJson, Jwt, Mapping, MethodType, Other, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, StatusCode, Summary, Text, TypeError, View, VndApiJson, Tiny as default };
