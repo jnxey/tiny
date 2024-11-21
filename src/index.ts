@@ -19,7 +19,7 @@ import {
 } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Dto } from '@/dto';
-import { Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
+import { Params, Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ParamsConfigCache, StatusCode } from '@/values';
 
@@ -55,6 +55,7 @@ export {
   // dto
   Dto,
   // params
+  Params,
   ParamsModel,
   ParamsModelResult,
   Declare,

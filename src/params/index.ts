@@ -32,7 +32,7 @@ export class ParamsModel {
   public static def = {
     number: 0,
     boolean: true,
-    string: 'string'
+    string: ''
   };
 
   // 填充

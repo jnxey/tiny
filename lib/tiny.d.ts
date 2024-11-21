@@ -111,6 +111,9 @@ declare class Dto {
     constructor({ code, result, msg }: DtoInput);
 }
 
+declare function Params<T extends ParamsModel>(params: {
+    new (): T;
+}, type: ParamsSource): Function;
 declare class ParamsModel {
     static def: {
         number: number;
@@ -146,4 +149,4 @@ declare class Tiny {
     static init(options: InitOptions): void;
 }
 
-export { Controller, CspReport, DataType, Declare, Delete, Dto, FormData, FormUrlencoded, Get, Json, JsonPatchJson, Jwt, Mapping, MethodType, Other, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, StatusCode, Summary, Text, TypeError, View, VndApiJson, Tiny as default };
+export { Controller, CspReport, DataType, Declare, Delete, Dto, FormData, FormUrlencoded, Get, Json, JsonPatchJson, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, StatusCode, Summary, Text, TypeError, View, VndApiJson, Tiny as default };
