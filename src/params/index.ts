@@ -1,6 +1,6 @@
 import { ParamsConfigCache, ParamsSource, ParamsType, StatusCode } from '@/values';
 import { isBoolean, isEmpty, isString } from '@/tools';
-import { ExtendableContext, Next } from 'koa';
+import { ExtendableContext } from 'koa';
 
 /*
  * 参数模型
@@ -12,7 +12,6 @@ export function Params<T extends ParamsModel>(params: { new (): T }, type: Param
     descriptor.value = function (): any {
       const args = arguments;
       const ctx: ExtendableContext = args[0];
-      const next: Next = args[1];
       const current: object = type === ParamsSource.body ? ctx.request.body : ctx.query;
       const result: ParamsModelResult = _params.fill(current);
       if (result.valid) {

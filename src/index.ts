@@ -21,6 +21,7 @@ import { Jwt, Protected } from '@/jwt';
 import { Dto } from '@/dto';
 import { Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
 import { InitOptions } from '@/types';
+import { MethodType, DataType, ParamsSource, ParamsType, ParamsConfigCache, StatusCode } from '@/values';
 
 class Tiny {
   // 初始化
@@ -58,7 +59,14 @@ export {
   ParamsModelResult,
   Declare,
   Required,
-  TypeError
+  TypeError,
+  // values
+  MethodType,
+  DataType,
+  ParamsSource,
+  ParamsType,
+  ParamsConfigCache,
+  StatusCode
 };
 
 export default Tiny;
