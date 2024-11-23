@@ -28,6 +28,7 @@ declare enum ParamsType {
 }
 declare const ParamsConfigCache = "PARAMS_CONFIG_CACHE";
 declare const StatusCode: {
+    success: number;
     paramsError: number;
     authError: number;
     serveError: number;
@@ -106,6 +107,16 @@ declare class Dto {
     msg?: string;
     constructor({ code, result, msg }: DtoInput);
 }
+declare class DtoCtxExtend<T = any, Q = any> {
+    params?: T;
+    payload?: Q;
+    constructor({ params, payload }: {
+        params: any;
+        payload: any;
+    });
+    setParams(params: T): void;
+    setPayload(payload: Q): void;
+}
 
 declare function Params<T extends ParamsModel>(params: {
     new (): T;
@@ -118,6 +129,7 @@ declare class ParamsModel {
         number: number;
         boolean: boolean;
         string: string;
+        null: null;
     };
     getConfigCache(): any;
     fill<T>(map: object): ParamsModelResult;
@@ -149,4 +161,4 @@ declare class Tiny {
     static init(options: InitOptions): void;
 }
 
-export { Controller, DataType, Declare, Delete, Dto, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, Summary, Text, TypeError, View, Tiny as default };
+export { Controller, DataType, Declare, Delete, Dto, DtoCtxExtend, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, Summary, Text, TypeError, View, Tiny as default };

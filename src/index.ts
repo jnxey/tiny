@@ -1,6 +1,6 @@
 import { Controller, Delete, FormData, FormUrlencoded, Get, Json, Mapping, Other, Post, Prefix, Put, Summary, Text, View } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
-import { Dto } from '@/dto';
+import { Dto, DtoCtxExtend } from '@/dto';
 import { Params, Result, Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ParamsConfigCache, StatusCode } from '@/values';
@@ -33,6 +33,7 @@ export {
   Protected,
   // dto
   Dto,
+  DtoCtxExtend,
   // params
   Params,
   Result,

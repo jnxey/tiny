@@ -1,6 +1,7 @@
 import { ParamsConfigCache, ParamsSource, ParamsType, StatusCode } from '@/values';
 import { copyAttrToNew, isBoolean, isEmpty, isString } from '@/tools';
-import { ExtendableContext } from 'koa';
+import { ExtendableContext, Next } from 'koa';
+import { DtoCtxExtend, Dto } from '@/dto';
 
 /*
  * 参数模型
@@ -14,13 +15,15 @@ export function Params<T extends ParamsModel>(params: { new (): T }, type: Param
     descriptor.value = function (): any {
       const args = arguments;
       const ctx: ExtendableContext = args[0];
+      const next: Next = args[1];
       const current: object = type === ParamsSource.body ? ctx.request.body : ctx.query;
-      const result: ParamsModelResult = _params.fill(current);
+      const result: ParamsModelResult = _params.fill(current ?? {});
       if (result.valid) {
-        ctx.params = _params;
-        return func.apply(this, args);
+        const extend = new DtoCtxExtend({ ...(args[2] || {}), params: _params });
+        return func.call(this, ctx, next, extend);
       } else {
-        ctx.throw(StatusCode.paramsError, result.message);
+        ctx.body = new Dto({ code: StatusCode.paramsError, msg: result.message });
+        return next();
       }
     };
     copyAttrToNew(descriptor.value, func);
@@ -45,7 +48,8 @@ export class ParamsModel {
   public static def = {
     number: 0,
     boolean: true,
-    string: ''
+    string: '',
+    null: null
   };
 
   // 获取config

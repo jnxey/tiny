@@ -65,6 +65,7 @@ export class Controller {
       // 以下是接口信息
       Controller.apiInfoJson.push({
         module: module,
+        func: func,
         path: path,
         method: handler.METHOD,
         dataType: handler.DATA_TYPE,

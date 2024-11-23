@@ -50,6 +50,7 @@ export const ParamsConfigCache = 'PARAMS_CONFIG_CACHE';
  * 参数数据类型
  */
 export const StatusCode = {
+  success: 200,
   paramsError: 400,
   authError: 408,
   serveError: 500
