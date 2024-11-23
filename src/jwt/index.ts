@@ -47,7 +47,7 @@ export class Jwt {
    * 生成token
    */
   public static sign<T>(ctx: ExtendableContext, payload: T): string {
-    const token = jsonwebtoken.sign(payload, Jwt.options.privateKey, {
+    const token = jsonwebtoken.sign({ ...payload }, Jwt.options.privateKey, {
       algorithm: Jwt.options.algorithms,
       expiresIn: Jwt.options.expiresIn
     });

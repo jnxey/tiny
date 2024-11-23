@@ -26,7 +26,7 @@ declare enum ParamsType {
     boolean = "boolean",
     string = "string"
 }
-declare const ParamsConfigCache = "PARAMS_CONFIG_CACHE";
+declare const ModelConfigCache = "PARAMS_CONFIG_CACHE";
 declare const StatusCode: {
     success: number;
     paramsError: number;
@@ -118,13 +118,7 @@ declare class DtoCtxExtend<P1 = any, P2 = any> {
     setPayload(payload: P2): void;
 }
 
-declare function Params<T extends ParamsModel>(params: {
-    new (): T;
-}, type: ParamsSource, validate?: boolean): Function;
-declare function Result<T extends ParamsModel>(result: {
-    new (): T;
-}): Function;
-declare class ParamsModel {
+declare class Model {
     static def: {
         number: number;
         boolean: boolean;
@@ -132,9 +126,9 @@ declare class ParamsModel {
         null: null;
     };
     getConfigCache(): any;
-    fill<T>(map: object): ParamsModelResult;
+    fill<T>(map: object): ModelResult;
 }
-declare class ParamsModelResult {
+declare class ModelResult {
     valid: boolean;
     message: string;
     constructor(valid: boolean, message?: string);
@@ -156,6 +150,13 @@ declare function TypeCheck<T>(type: ParamsType | T, message?: string): Function;
  */
 declare function StringLength<T>(range: number[], message?: string): Function;
 
+declare function Params<T extends Model>(params: {
+    new (): T;
+}, type: ParamsSource, validate?: boolean): Function;
+declare function Result<T extends Model>(result: {
+    new (): T;
+}): Function;
+
 interface InitOptions {
     controller?: ControllerOptionsInput;
     jwt?: JwtOptionsInput;
@@ -165,4 +166,4 @@ declare class Tiny {
     static init(options: InitOptions): void;
 }
 
-export { Controller, DataType, Declare, Delete, Dto, DtoCtxExtend, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, StringLength, Summary, Text, TypeCheck, View, Tiny as default };
+export { Controller, DataType, Declare, Delete, Dto, DtoCtxExtend, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Model, ModelConfigCache, ModelResult, Other, Params, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, StringLength, Summary, Text, TypeCheck, View, Tiny as default };

@@ -44,7 +44,7 @@ export enum ParamsType {
 /*
  * 缓存参数配置的键
  */
-export const ParamsConfigCache = 'PARAMS_CONFIG_CACHE';
+export const ModelConfigCache = 'PARAMS_CONFIG_CACHE';
 
 /*
  * 参数数据类型

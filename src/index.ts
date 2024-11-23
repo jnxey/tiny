@@ -1,9 +1,10 @@
 import { Controller, Delete, FormData, FormUrlencoded, Get, Json, Mapping, Other, Post, Prefix, Put, Summary, Text, View } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Dto, DtoCtxExtend } from '@/dto';
-import { Params, Result, Declare, ParamsModel, ParamsModelResult, Required, TypeCheck, StringLength } from '@/params';
+import { Params, Result } from '@/params';
+import { Declare, Model, ModelResult, Required, TypeCheck, StringLength } from '@/model';
 import { InitOptions } from '@/types';
-import { MethodType, DataType, ParamsSource, ParamsType, ParamsConfigCache, StatusCode } from '@/values';
+import { MethodType, DataType, ParamsSource, ParamsType, ModelConfigCache, StatusCode } from '@/values';
 
 class Tiny {
   // 初始化
@@ -37,8 +38,8 @@ export {
   // params
   Params,
   Result,
-  ParamsModel,
-  ParamsModelResult,
+  Model,
+  ModelResult,
   Declare,
   Required,
   TypeCheck,
@@ -48,7 +49,7 @@ export {
   DataType,
   ParamsSource,
   ParamsType,
-  ParamsConfigCache,
+  ModelConfigCache,
   StatusCode
 };
 
