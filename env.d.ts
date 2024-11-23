@@ -3,8 +3,6 @@ import { Files } from 'formidable';
 
 declare module 'koa' {
   interface ExtendableContext {
-    params?: any;
-    payload?: any;
     request: Request;
     <T>(body: T): T;
   }

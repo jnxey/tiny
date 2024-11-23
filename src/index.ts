@@ -1,7 +1,7 @@
 import { Controller, Delete, FormData, FormUrlencoded, Get, Json, Mapping, Other, Post, Prefix, Put, Summary, Text, View } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Dto, DtoCtxExtend } from '@/dto';
-import { Params, Result, Declare, ParamsModel, ParamsModelResult, Required, TypeError } from '@/params';
+import { Params, Result, Declare, ParamsModel, ParamsModelResult, Required, TypeCheck, StringLength } from '@/params';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ParamsConfigCache, StatusCode } from '@/values';
 
@@ -41,7 +41,8 @@ export {
   ParamsModelResult,
   Declare,
   Required,
-  TypeError,
+  TypeCheck,
+  StringLength,
   // values
   MethodType,
   DataType,

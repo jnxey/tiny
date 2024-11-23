@@ -75,13 +75,18 @@ export class ParamsModel {
       }
       if (!hasNull && paramsConfig[name].type === ParamsType.string && !isString(map[name])) {
         return new ParamsModelResult(false, paramsConfig[name].typeErrorMessage);
+      } else if (paramsConfig[name].stringRange) {
+        const min = paramsConfig[name].stringRange[0];
+        const max = paramsConfig[name].stringRange[1];
+        if (map[name].length < min && map[name].length > max) {
+          return new ParamsModelResult(false, paramsConfig[name].stringRangeMessage);
+        }
       }
       if (!hasNull && paramsConfig[name].type instanceof ParamsModel) {
         const model = new paramsConfig[name]();
         const result: ParamsModelResult = model.fill(map[name]);
         if (!result.valid) return result;
       }
-
       this[name] = map[name];
     }
     return new ParamsModelResult(true);
@@ -124,11 +129,22 @@ export function Required(message?: string): Function {
 /**
  * 添加类型错误提示语
  */
-export function TypeError<T>(type: ParamsType | T, message?: string): Function {
+export function TypeCheck<T>(type: ParamsType | T, message?: string): Function {
   return function (target: any, propertyKey: string) {
     _checkParamsConfigExist(target, propertyKey);
     target.constructor[ParamsConfigCache][propertyKey].type = type;
     target.constructor[ParamsConfigCache][propertyKey].typeErrorMessage = message;
+  };
+}
+
+/**
+ * 添加类型错误提示语
+ */
+export function StringLength<T>(range: number[], message?: string): Function {
+  return function (target: any, propertyKey: string) {
+    _checkParamsConfigExist(target, propertyKey);
+    target.constructor[ParamsConfigCache][propertyKey].stringRange = range;
+    target.constructor[ParamsConfigCache][propertyKey].stringRangeMessage = message;
   };
 }
 

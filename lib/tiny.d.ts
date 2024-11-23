@@ -107,15 +107,15 @@ declare class Dto {
     msg?: string;
     constructor({ code, result, msg }: DtoInput);
 }
-declare class DtoCtxExtend<T = any, Q = any> {
-    params?: T;
-    payload?: Q;
+declare class DtoCtxExtend<P1 = any, P2 = any> {
+    params: P1;
+    payload: P2;
     constructor({ params, payload }: {
         params: any;
         payload: any;
     });
-    setParams(params: T): void;
-    setPayload(payload: Q): void;
+    setParams(params: P1): void;
+    setPayload(payload: P2): void;
 }
 
 declare function Params<T extends ParamsModel>(params: {
@@ -150,7 +150,11 @@ declare function Required(message?: string): Function;
 /**
  * 添加类型错误提示语
  */
-declare function TypeError<T>(type: ParamsType | T, message?: string): Function;
+declare function TypeCheck<T>(type: ParamsType | T, message?: string): Function;
+/**
+ * 添加类型错误提示语
+ */
+declare function StringLength<T>(range: number[], message?: string): Function;
 
 interface InitOptions {
     controller?: ControllerOptionsInput;
@@ -161,4 +165,4 @@ declare class Tiny {
     static init(options: InitOptions): void;
 }
 
-export { Controller, DataType, Declare, Delete, Dto, DtoCtxExtend, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, Summary, Text, TypeError, View, Tiny as default };
+export { Controller, DataType, Declare, Delete, Dto, DtoCtxExtend, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Other, Params, ParamsConfigCache, ParamsModel, ParamsModelResult, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, StringLength, Summary, Text, TypeCheck, View, Tiny as default };
