@@ -3,7 +3,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { JwtOptions, JwtOptionsInput } from '@/jwt/types';
 import { ExtendableContext, Next } from 'koa';
 import { StatusCode } from '@/values';
-import { DtoCtxExtend } from '@/dto';
+import { Dto, DtoCtxExtend } from '@/dto';
 
 /// Jwt构造函数
 export class Jwt {
@@ -13,6 +13,7 @@ export class Jwt {
     expiresIn: '24h',
     ignoreExpiration: false,
     errorCode: StatusCode.authError,
+    errorMsg: 'Unauthorized access',
     tokenKey: 'token',
     getToken: function (ctx: ExtendableContext) {
       return ctx.cookies.get(Jwt.options.tokenKey);
@@ -74,7 +75,8 @@ export function Protected(): Function {
         const extend = new DtoCtxExtend({ ...(args[2] || {}), payload: payload });
         return func.call(this, ctx, next, extend);
       } else {
-        ctx.throw(Jwt.options.errorCode);
+        ctx.body = new Dto({ code: Jwt.options.errorCode, msg: Jwt.options.errorMsg });
+        return next();
       }
     };
     copyAttrToNew(descriptor.value, func);

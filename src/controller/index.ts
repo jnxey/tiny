@@ -1,9 +1,8 @@
 import Router from '@koa/router';
 import { koaBody } from 'koa-body';
-import { ExtendableContext, Next } from 'koa';
 import { isObject, kebabCase, syncObjectData } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerOptionsInput } from '@/controller/types';
-import { MethodType, DataType, StatusCode } from '@/values';
+import { MethodType, DataType } from '@/values';
 import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 
 export class Controller {
@@ -40,27 +39,20 @@ export class Controller {
       if (handler.JWT_PROTECTED) {
         Controller.jwtProtectedList.push(path);
       }
-      const interceptor: Router.Middleware = (ctx: ExtendableContext, next: Next) => {
-        try {
-          return handler(ctx, next);
-        } catch (err: Error | any) {
-          ctx.throw(StatusCode.serveError, String(err.message));
-        }
-      };
       if (handler.METHOD === MethodType.get) {
-        router.get(path, interceptor);
+        router.get(path, handler);
       } else if (handler.METHOD === MethodType.delete) {
-        router.del(path, interceptor);
+        router.del(path, handler);
       } else if (handler.METHOD === MethodType.post) {
         //
-        if (handler.DATA_TYPE === DataType.other) router.post(path, interceptor);
-        else router.post(path, koaBody(handler.DATA_TYPE_OPTIONS), interceptor);
+        if (handler.DATA_TYPE === DataType.other) router.post(path, handler);
+        else router.post(path, koaBody(handler.DATA_TYPE_OPTIONS), handler);
       } else if (handler.METHOD === MethodType.put) {
         //
-        if (handler.DATA_TYPE === DataType.other) router.put(path, interceptor);
-        else router.put(path, koaBody(handler.DATA_TYPE_OPTIONS), interceptor);
+        if (handler.DATA_TYPE === DataType.other) router.put(path, handler);
+        else router.put(path, koaBody(handler.DATA_TYPE_OPTIONS), handler);
       } else if (handler.METHOD === MethodType.view) {
-        router.get(path, interceptor);
+        router.get(path, handler);
       }
       // 以下是接口信息
       Controller.apiInfoJson.push({

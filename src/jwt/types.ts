@@ -6,6 +6,7 @@ export type JwtOptions = {
   expiresIn: string;
   ignoreExpiration: boolean;
   errorCode: number;
+  errorMsg: string;
   tokenKey: string;
   getToken: (ctx: ExtendableContext) => string | undefined;
   setToken: (ctx: ExtendableContext, value: string) => any;
@@ -18,6 +19,7 @@ export type JwtOptionsInput = {
   expiresIn?: string;
   ignoreExpiration?: boolean;
   errorCode?: number;
+  errorMsg?: string;
   tokenKey?: string;
   getToken?: (ctx: ExtendableContext) => string | undefined;
   setToken?: (ctx: ExtendableContext, value: string) => any;
