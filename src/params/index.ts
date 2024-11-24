@@ -7,7 +7,12 @@ import { Model, ModelResult } from '@/model';
 /*
  * 参数模型
  */
-export function Params<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true): Function {
+export function Params<T extends Model>(
+  params: { new (): T },
+  type: ParamsSource,
+  validate: boolean = true,
+  handler?: <P1, P2>(p1: P1, p2: P2) => T
+): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const func: Function = descriptor.value;
     const _params = new params();
@@ -17,8 +22,9 @@ export function Params<T extends Model>(params: { new (): T }, type: ParamsSourc
       const args = arguments;
       const ctx: ExtendableContext = args[0];
       const next: Next = args[1];
+      const payload = args[2]?.payload;
       const current: object = type === ParamsSource.body ? ctx.request.body : ctx.query;
-      const result: ModelResult = _params.fill(current ?? {});
+      const result: ModelResult = _params.fill(!!handler ? handler(current ?? {}, payload) : current ?? {});
       if (result.valid) {
         const extend = new DtoCtxExtend({ ...(args[2] || {}), params: _params });
         return func.call(this, ctx, next, extend);

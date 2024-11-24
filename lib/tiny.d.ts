@@ -154,7 +154,7 @@ declare function StringLength<T>(range: number[], message?: string): Function;
 
 declare function Params<T extends Model>(params: {
     new (): T;
-}, type: ParamsSource, validate?: boolean): Function;
+}, type: ParamsSource, validate?: boolean, handler?: <P1, P2>(p1: P1, p2: P2) => T): Function;
 declare function Result<T extends Model>(result: {
     new (): T;
 }): Function;
