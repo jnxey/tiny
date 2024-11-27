@@ -1,5 +1,4 @@
 import { copyAttrToNew, isObject, syncObjectData } from '@/tools';
-import jsonwebtoken from 'jsonwebtoken';
 import { JwtOptions, JwtOptionsInput } from '@/jwt/types';
 import { ExtendableContext, Next } from 'koa';
 import { StatusCode } from '@/values';
@@ -15,6 +14,7 @@ export class Jwt {
     errorCode: StatusCode.authError,
     errorMsg: 'Unauthorized access',
     tokenKey: 'token',
+    jsonwebtoken: { verify: () => {}, sign: () => {} },
     getToken: function (ctx: ExtendableContext) {
       return ctx.cookies.get(Jwt.options.tokenKey);
     },
@@ -38,7 +38,7 @@ export class Jwt {
     const token = Jwt.options.getToken(ctx);
     if (!token) return null;
     try {
-      return jsonwebtoken.verify(token, Jwt.options.privateKey);
+      return Jwt.options.jsonwebtoken.verify(token, Jwt.options.privateKey);
     } catch (err) {
       return null;
     }
@@ -48,7 +48,11 @@ export class Jwt {
    * 生成token
    */
   public static sign<T>(ctx: ExtendableContext, payload: T): string {
-    const token = jsonwebtoken.sign({ ...payload }, Jwt.options.privateKey, {
+    if (isObject(payload)) {
+      delete payload['iat'];
+      delete payload['exp'];
+    }
+    const token = Jwt.options.jsonwebtoken.sign({ ...payload }, Jwt.options.privateKey, {
       algorithm: Jwt.options.algorithms,
       expiresIn: Jwt.options.expiresIn
     });

@@ -1,6 +1,6 @@
 import { ExtendableContext, Next } from 'koa';
-import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 import { DataType, MethodType } from '@/values';
+import Router from '@koa/router';
 
 export type ControllerOptions = {
   prefix: string;
@@ -20,7 +20,7 @@ export interface ControllerHandler {
   MAPPING?: string;
   SUMMARY?: string;
   JWT_PROTECTED?: boolean;
-  DATA_TYPE_OPTIONS?: Partial<KoaBodyMiddlewareOptions>;
+  DATA_TYPE_HANDLER?: Router.Middleware;
   PARAMS_MODEL?: object;
   RESULT_MODEL?: object;
 }

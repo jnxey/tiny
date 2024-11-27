@@ -1,9 +1,7 @@
 import Router from '@koa/router';
-import { koaBody } from 'koa-body';
 import { isObject, kebabCase, syncObjectData } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerOptionsInput } from '@/controller/types';
 import { MethodType, DataType } from '@/values';
-import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 
 export class Controller {
   public static options: ControllerOptions = {
@@ -39,20 +37,17 @@ export class Controller {
       if (handler.JWT_PROTECTED) {
         Controller.jwtProtectedList.push(path);
       }
+      const middleware = handler.DATA_TYPE_HANDLER;
       if (handler.METHOD === MethodType.get) {
-        router.get(path, handler);
+        middleware ? router.get(path, middleware, handler) : router.get(path, handler);
       } else if (handler.METHOD === MethodType.delete) {
-        router.del(path, handler);
+        middleware ? router.del(path, middleware, handler) : router.del(path, handler);
       } else if (handler.METHOD === MethodType.post) {
-        //
-        if (handler.DATA_TYPE === DataType.other) router.post(path, handler);
-        else router.post(path, koaBody(handler.DATA_TYPE_OPTIONS), handler);
+        middleware ? router.post(path, middleware, handler) : router.post(path, handler);
       } else if (handler.METHOD === MethodType.put) {
-        //
-        if (handler.DATA_TYPE === DataType.other) router.put(path, handler);
-        else router.put(path, koaBody(handler.DATA_TYPE_OPTIONS), handler);
+        middleware ? router.put(path, middleware, handler) : router.put(path, handler);
       } else if (handler.METHOD === MethodType.view) {
-        router.get(path, handler);
+        middleware ? router.get(path, middleware, handler) : router.get(path, handler);
       }
       // 以下是接口信息
       Controller.apiInfoJson.push({
@@ -117,49 +112,50 @@ export function View(): Function {
 /*
  * body的数据结构为json
  */
-export function Json(options?: Partial<KoaBodyMiddlewareOptions>): Function {
+export function Json(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     descriptor.value.DATA_TYPE = DataType.json;
-    descriptor.value.DATA_TYPE_OPTIONS = options || { json: true };
+    descriptor.value.DATA_TYPE_HANDLER = handler;
   };
 }
 
 /*
  * body的数据结构为文本
  */
-export function Text(options?: Partial<KoaBodyMiddlewareOptions>): Function {
+export function Text(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     descriptor.value.DATA_TYPE = DataType.text;
-    descriptor.value.DATA_TYPE_OPTIONS = options || { text: true };
+    descriptor.value.DATA_TYPE_HANDLER = handler;
   };
 }
 
 /*
  * body的数据结构为FormUrlencoded
  */
-export function FormUrlencoded(options?: Partial<KoaBodyMiddlewareOptions>): Function {
+export function FormUrlencoded(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.formUrlencoded;
-    descriptor.value.DATA_TYPE_OPTIONS = options;
+    descriptor.value.DATA_TYPE = DataType.text;
+    descriptor.value.DATA_TYPE_HANDLER = handler;
   };
 }
 
 /*
  * body的数据结构为Form表单
  */
-export function FormData(options?: Partial<KoaBodyMiddlewareOptions>): Function {
+export function FormData(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.formData;
-    descriptor.value.DATA_TYPE_OPTIONS = options;
+    descriptor.value.DATA_TYPE = DataType.text;
+    descriptor.value.DATA_TYPE_HANDLER = handler;
   };
 }
 
 /*
  * body的数据结构为other
  */
-export function Other(): Function {
+export function Other(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     descriptor.value.DATA_TYPE = DataType.other;
+    descriptor.value.DATA_TYPE_HANDLER = handler;
   };
 }
 

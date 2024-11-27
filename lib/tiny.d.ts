@@ -1,6 +1,5 @@
 /// <reference types="koa__router" />
 import Router from '@koa/router';
-import { KoaBodyMiddlewareOptions } from 'koa-body/lib/types';
 import { ExtendableContext } from 'koa';
 
 declare enum MethodType {
@@ -55,11 +54,11 @@ declare function Delete(): Function;
 declare function Post(): Function;
 declare function Put(): Function;
 declare function View(): Function;
-declare function Json(options?: Partial<KoaBodyMiddlewareOptions>): Function;
-declare function Text(options?: Partial<KoaBodyMiddlewareOptions>): Function;
-declare function FormUrlencoded(options?: Partial<KoaBodyMiddlewareOptions>): Function;
-declare function FormData(options?: Partial<KoaBodyMiddlewareOptions>): Function;
-declare function Other(): Function;
+declare function Json(handler?: Router.Middleware): Function;
+declare function Text(handler?: Router.Middleware): Function;
+declare function FormUrlencoded(handler?: Router.Middleware): Function;
+declare function FormData(handler?: Router.Middleware): Function;
+declare function Other(handler?: Router.Middleware): Function;
 declare function Prefix(text: string): Function;
 declare function Mapping(path: string): Function;
 declare function Summary(text: string): Function;
@@ -72,6 +71,10 @@ type JwtOptions = {
     errorCode: number;
     errorMsg: string;
     tokenKey: string;
+    jsonwebtoken: {
+        verify: Function;
+        sign: Function;
+    };
     getToken: (ctx: ExtendableContext) => string | undefined;
     setToken: (ctx: ExtendableContext, value: string) => any;
     isResetToken: (ctx: ExtendableContext) => boolean;
@@ -84,6 +87,10 @@ type JwtOptionsInput = {
     errorCode?: number;
     errorMsg?: string;
     tokenKey?: string;
+    jsonwebtoken: {
+        verify: Function;
+        sign: Function;
+    };
     getToken?: (ctx: ExtendableContext) => string | undefined;
     setToken?: (ctx: ExtendableContext, value: string) => any;
     isResetToken?: (ctx: ExtendableContext) => boolean;
