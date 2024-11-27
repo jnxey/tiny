@@ -2,7 +2,7 @@ import { Controller, Delete, FormData, FormUrlencoded, Get, Json, Mapping, Other
 import { Jwt, Protected } from '@/jwt';
 import { Dto, DtoCtxExtend } from '@/dto';
 import { Params, Result } from '@/params';
-import { Declare, Model, ModelResult, Required, TypeCheck, StringLength } from '@/model';
+import { Declare, Model, ModelResult, Required, TypeCheck, StringLength, ArrayCheck } from '@/model';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ModelConfigCache, StatusCode } from '@/values';
 
@@ -44,6 +44,7 @@ export {
   Required,
   TypeCheck,
   StringLength,
+  ArrayCheck,
   // values
   MethodType,
   DataType,

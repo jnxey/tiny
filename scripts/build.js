@@ -20,7 +20,7 @@ export default {
     rollupResolve(),
     commonjs(),
     json(),
-    visualizer({ open: true }),
+    visualizer({ open: false }),
     alias({
       entries: [{ find: '@', replacement: resolve(rootDir, 'src') }]
     })

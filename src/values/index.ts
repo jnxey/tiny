@@ -38,7 +38,8 @@ export enum ParamsSource {
 export enum ParamsType {
   number = 'number',
   boolean = 'boolean',
-  string = 'string'
+  string = 'string',
+  array = 'array'
 }
 
 /*

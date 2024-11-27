@@ -23,7 +23,8 @@ declare enum ParamsSource {
 declare enum ParamsType {
     number = "number",
     boolean = "boolean",
-    string = "string"
+    string = "string",
+    array = "array"
 }
 declare const ModelConfigCache = "PARAMS_CONFIG_CACHE";
 declare const StatusCode: {
@@ -135,12 +136,14 @@ declare class Model {
         null: null;
     };
     getConfigCache(): any;
+    static checkType(config: any, value: any): ModelResult;
     fill<T>(map: object): ModelResult;
 }
 declare class ModelResult {
     valid: boolean;
     message: string;
-    constructor(valid: boolean, message?: string);
+    value?: any;
+    constructor(valid: boolean, message?: string, value?: any);
 }
 /**
  * 添加参数声明，以及描述提示语
@@ -154,6 +157,10 @@ declare function Required(message?: string): Function;
  * 添加类型错误提示语
  */
 declare function TypeCheck<T>(type: ParamsType | T, message?: string): Function;
+/**
+ * 设置此字段为数组类型
+ */
+declare function ArrayCheck<T>(type: ParamsType | T, message?: string, maxLength?: number): Function;
 /**
  * 添加类型错误提示语
  */
@@ -175,4 +182,4 @@ declare class Tiny {
     static init(options: InitOptions): void;
 }
 
-export { Controller, DataType, Declare, Delete, Dto, DtoCtxExtend, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Model, ModelConfigCache, ModelResult, Other, Params, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, StringLength, Summary, Text, TypeCheck, View, Tiny as default };
+export { ArrayCheck, Controller, DataType, Declare, Delete, Dto, DtoCtxExtend, FormData, FormUrlencoded, Get, Json, Jwt, Mapping, MethodType, Model, ModelConfigCache, ModelResult, Other, Params, ParamsSource, ParamsType, Post, Prefix, Protected, Put, Required, Result, StatusCode, StringLength, Summary, Text, TypeCheck, View, Tiny as default };
