@@ -31,7 +31,7 @@ export class Model {
       for (let i = 0; i < value.length; i++) {
         const item = value[i];
         const _result = Model.checkType({ type: config.arrayType, typeErrorMessage: config.arrayTypeErrorMessage }, item);
-        if (!_result?.valid) array.push(_result.value);
+        if (_result?.valid) array.push(_result.value);
         else return _result;
       }
       value = array;
