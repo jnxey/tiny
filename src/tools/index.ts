@@ -13,6 +13,7 @@ export const isUndefined = (value: any): boolean => getType(value) === 'undefine
 export const isPromise = (value: any): boolean => getType(value) === 'promise';
 export const isNode = (value: any): boolean => !isNull(value) && !isUndefined(value) && Boolean(value.nodeName) && Boolean(value.nodeType);
 export const isElement = (value: any): boolean => isNode(value) && value.nodeType === 1;
+export const isDate = (value: any): boolean => getType(value) === 'date';
 export const isEmpty = (value: any): boolean => value === undefined || value === '' || value === null;
 
 /**

@@ -1,9 +1,9 @@
+import { ModelConfigCache, ParamsType } from '@/values';
+import { isArray, isBoolean, isDate, isEmpty, isString } from '@/tools';
+
 /*
  * 参数模型
  */
-import { ModelConfigCache, ParamsType } from '@/values';
-import { isArray, isBoolean, isEmpty, isString } from '@/tools';
-
 export class Model {
   // 默认值
   public static def = {
@@ -31,16 +31,24 @@ export class Model {
       for (let i = 0; i < value.length; i++) {
         const item = value[i];
         const _result = Model.checkType({ type: config.arrayType, typeErrorMessage: config.arrayTypeErrorMessage }, item);
-        if (_result?.valid) array.push(_result.value);
-        else return _result;
+        if (_result?.valid) {
+          array.push(_result.value);
+        } else {
+          return _result;
+        }
       }
       value = array;
     }
-    if (!hasNull && config.type === ParamsType.number && isNaN(Number(value))) {
+    if (!hasNull && config.type === ParamsType.number && isNaN(parseFloat(value))) {
       return new ModelResult(false, config.typeErrorMessage);
+    } else if (!hasNull && config.type === ParamsType.number) {
+      value = parseFloat(value); // 数字为 字符串数字 时，做处理
     }
     if (!hasNull && config.type === ParamsType.boolean && !isBoolean(value)) {
       return new ModelResult(false, config.typeErrorMessage);
+    }
+    if (!hasNull && config.type === ParamsType.string && isDate(value)) {
+      value = String(value); // 日期类型 先转 字符串
     }
     if (!hasNull && config.type === ParamsType.string && !isString(value)) {
       return new ModelResult(false, config.typeErrorMessage);
@@ -51,11 +59,14 @@ export class Model {
         return new ModelResult(false, config.stringRangeMessage);
       }
     }
-    if (!hasNull && config.type instanceof Model) {
+    if (!hasNull && Model.prototype.isPrototypeOf(config.type?.prototype)) {
       const model = new config.type();
       const result: ModelResult = model.fill(value);
-      if (!result.valid) return result;
-      else value = result.value;
+      if (result.valid) {
+        value = result.value;
+      } else {
+        return result;
+      }
     }
     return new ModelResult(true, '', value);
   }
