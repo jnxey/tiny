@@ -2,9 +2,9 @@
 
 ## 介绍
 
-Tiny是一个简单的、基于Node+Typescript+Koa2/生态的服务端工具库，它的核心代码只有不到20K，它提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置登录状态、编写API文档的时间，以及其他额外的功能。
+* Tiny是一个简单的、基于Node+Typescript+Koa2/生态的服务端工具库，它的核心代码只有不到20K，它提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置登录状态、编写API文档的时间，以及其他额外的功能。
 
-Tiny旨在提供一个简单的工具库给开发者使用，不涉及部署、运维相关内容。
+* Tiny旨在提供一个简单的工具库给开发者使用，不涉及部署、运维相关内容。
 
 ## 环境
 
@@ -68,7 +68,7 @@ Tiny旨在提供一个简单的工具库给开发者使用，不涉及部署、�
 
 ### 创建一个Tiny应用
 
-创建基于Tiny的项目可以使用Tiny提供的项目模版，该模版设置了简单的项目结构，可供您参考。
+* 创建基于Tiny的项目可以使用Tiny提供的项目模版，该模版设置了简单的项目结构，可供您参考。
 
 ```shell
 npm create koa-tiny <project-name>
@@ -85,10 +85,10 @@ npm install --save koa-tiny
 
 ## 使用
 
-### 初始化配置
+### 初次使用示例
 
+* 文件`index.ts`
 ```typescript
-// index
 import Tiny, { Controller } from 'koa-tiny';
 import Koa from 'koa';
 import Router from '@koa/router';
@@ -108,9 +108,8 @@ Controller.connect<Manager>(new Manager(), router);
 
 app.listen(4000);
 ```
-
+* 文件`@/controller/manager.ts`
 ```typescript
-// @/controller/manager
 import { Json, Summary, Dto, StatusCode, Get } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
 
@@ -124,7 +123,7 @@ export class Manager {
   }
 }
 ```
-
+* `InitOptions`参数说明
 ```typescript
 interface InitOptions {
   // 控制器配置参数
@@ -142,9 +141,17 @@ interface InitOptions {
 
 #### Controller
 
-* 使用`Controller.connect`连接系统的控制器类
-* 使用`Controller.options`得到控制器配置项
+* 使用`Controller.connect<T>(instance: T, router: Router)`连接系统的控制器类
 ```typescript
+// 连接你的控制器
+Controller.connect<Manager>(new Manager(), router);
+```
+* 使用`Controller.options: ControllerOptionsInput`得到控制器配置项
+```typescript
+// 打印配置
+console.log(Controller.options)
+
+// 配置类型
 type ControllerOptionsInput = {
   // API前缀-全局，默认：''
   prefix?: string;
@@ -153,66 +160,245 @@ type ControllerOptionsInput = {
 };
 ```
 * 使用`Controller.apiInfoJson`得到API的JSON信息
+```typescript
+// 打印JSON信息
+console.log(Controller.apiInfoJson)
+```
 * 使用`Controller.jwtProtectedList`得到jwt受到保护的路由列表
+```typescript
+// 打印列表信息
+console.log(Controller.jwtProtectedList)
+```
 
 #### Get
 
-* 使用`Get`装饰器
+* 使用`@Get()`装饰器，声明一个Get方法
+```typescript
+import { Get } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Get()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Delete
 
-* 使用`Delete`装饰器
+* 使用`@Delete()`装饰器，声明一个Delete方法
+```typescript
+import { Delete } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Delete()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Post
 
-* 使用`Post`装饰器
+* 使用`@Post()`装饰器，声明一个Post方法
+```typescript
+import { Post } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Put
 
-* 使用`Put`装饰器
+* 使用`@Put()`装饰器，声明一个Put方法
+```typescript
+import { Put } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Put()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### View
 
-* 使用`View`装饰器
+* 使用`@View()`装饰器，声明一个View方法
+```typescript
+import { View } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @View()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Json
 
-* 使用`Json`装饰器
+* 使用`@Json(handler?: Router.Middleware)`装饰器，声明Body的数据类型
+```typescript
+import { Post, Json } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @Json()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Text
 
-* 使用`Text`装饰器
+* 使用`@Text(handler?: Router.Middleware)`装饰器，声明Body的数据类型
+```typescript
+import { Post, Text } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @Text()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### FormUrlencoded
 
-* 使用`FormUrlencoded`装饰器
+* 使用`@FormUrlencoded(handler?: Router.Middleware)`装饰器，声明Body的数据类型
+```typescript
+import { Post, FormUrlencoded } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @FormUrlencoded()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### FormData
 
-* 使用`FormData`装饰器
+* 使用`@FormData(handler?: Router.Middleware)`装饰器，声明Body的数据类型
+```typescript
+import { Post, FormData } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @FormData()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Other
 
-* 使用`Other`装饰器
+* 使用`@Other(handler?: Router.Middleware)`装饰器，声明Body的数据类型
+```typescript
+import { Post, Other } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @Other()
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Prefix
 
-* 使用`Prefix`装饰器
+* 使用`@Prefix(text: string)`装饰器，设置单个路由的前缀
+```typescript
+import { Post, Prefix } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @Prefix('/test/')
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Mapping
 
-* 使用`Mapping`装饰器
+* 使用`@Mapping(path: string)`装饰器，重置路由地址
+```typescript
+import { Post, Prefix } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @Prefix('/manager/test/:id')
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 #### Summary
 
-* 使用`Summary`装饰器
+* 使用`@Summary(text: string)`装饰器，给方法设置说明文旦
+```typescript
+import { Post, Summary } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+export class Manager {
+  @Post()
+  @Summary('测试方法')
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+  }
+}
+```
 
 ## Model
 
 #### Model
 
-* 使用`model<Model>.fill`填充数据模型
+* 使用`model<Model>.fill(map: object)`填充数据模型
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  name!: string;
+
+  @Declare()
+  password!: string;
+}
+
+const input = new LoginInput();
+const result: ModelResult = input.fill({...});
+if(result.valid) {
+  // ...
+}
+```
+
 * 使用`model<Model>.getConfigCache`获取当前模型配置
+```typescript
+const input = new LoginInput();
+console.log(input.getConfigCache())
+```
 
 ##### ModelResult
 
@@ -220,42 +406,133 @@ type ControllerOptionsInput = {
 
 #### Declare
 
-* 使用`Declare`装饰器
+* 使用`@Declare(description?: string)`装饰器，声明参数，注意：模型参数至少需要使用`Declare`
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  name!: string;
+}
+```
 
 #### Required
 
-* 使用`Required`装饰器
+* 使用`@Required(message?: string)`装饰器，设置属性必须
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  @Required('名称不能唯空')
+  name!: string;
+}
+```
 
 #### TypeCheck
 
-* 使用`TypeCheck`装饰器
+* 使用`@TypeCheck(type: ParamsType | T, message?: string)`装饰器，设置类型检查
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  @TypeCheck(ParamsType.string, '名称只能为字符串')
+  name!: string;
+}
+```
 
 #### ArrayCheck
 
-* 使用`ArrayCheck`装饰器
+* 使用`@ArrayCheck(type: ParamsType | T, message?: string, maxLength?: number)`装饰器，设置数组类型检查，前置条件为`TypeCheck`设置`ParamsType.array`
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  @TypeCheck(ParamsType.array, '列表只能为数组')
+  @ArrayCheck(ParamsType.string, '数组内容只能为字符串')
+  list!: string[];
+}
+```
 
 #### StringLength
 
-* 使用`StringLength`装饰器
+* 使用`@StringLength(range: number[], message?: string)`装饰器，设置字符串长度校验，前置条件为`TypeCheck`设置`ParamsType.string`
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  @TypeCheck(ParamsType.string, '名称只能为字符串')
+  @StringLength([1,50], '名称长度只能为1-50')
+  name!: string;
+}
+```
 
 ### Params
 
 #### Params
 
-* 使用`Params`装饰器
+* 使用`@Params<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1, P2>(p1: P1, p2: P2) => T)`装饰器，设置入参校验
+```typescript
+import { Post, Params } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+class LoginInput extends Model {
+  @Declare()
+  name!: string;
+
+  @Declare()
+  password!: string;
+}
+
+export class Manager {
+  @Post()
+  @Params(LoginInput, ParamsSource.body)
+  public async index(ctx: ExtendableContext, next: Next, extend: DtoCtxExtend<LoginInput, null>) {
+    console.log(extend.params.name)
+    console.log(extend.params.password)
+    // ...
+  }
+}
+```
 
 #### Result
 
-* 使用`Result`装饰器
+* 使用`@Result<T extends Model>(result: { new (): T })`装饰器，设置出参类型
+```typescript
+import { Post, Params, Dto, StatusCode } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+
+class LoginOut extends Model {
+  @Declare()
+  id!: string;
+
+  @Declare()
+  name!: string;
+}
+
+export class Manager {
+  @Post()
+  @Result(LoginOut)
+  public async index(ctx: ExtendableContext, next: Next) {
+    // ...
+    const info = new LoginOut();
+    info.fill({...});
+    ctx.body = new Dto({ code: StatusCode.success, result: info, msg: 'success' });
+  }
+}
+```
 
 ### Jwt
 
 #### Jwt
 
-* 使用`Jwt.sign`生成token
-* 使用`Jwt.verify`验证token
+* 使用`Jwt.sign<T>(ctx: ExtendableContext, payload: T)`生成token
+```typescript
+Jwt.sign<JwtPayload>(ctx, {...});
+```
+* 使用`Jwt.verify<T>(ctx: ExtendableContext): T | null`验证token
+```typescript
+const payload = Jwt.verify(ctx);
+```
 * 使用`Jwt.options`得到控制器配置项
 ```typescript
+// 打印配置
+console.log(Jwt.options)
+
+// 配置信息
 type JwtOptionsInput = {
   // jsonwebtoken类，详见：https://github.com/auth0/node-jsonwebtoken
   jsonwebtoken: {
