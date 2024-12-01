@@ -7,6 +7,7 @@ import { Dto, DtoCtxExtend } from '@/dto';
 /// Jwt构造函数
 export class Jwt {
   public static options: JwtOptions = {
+    jsonwebtoken: { verify: () => {}, sign: () => {} },
     privateKey: 'shared-secret',
     algorithms: 'HS256',
     expiresIn: '24h',
@@ -14,7 +15,6 @@ export class Jwt {
     errorCode: StatusCode.authError,
     errorMsg: 'Unauthorized access',
     tokenKey: 'token',
-    jsonwebtoken: { verify: () => {}, sign: () => {} },
     getToken: function (ctx: ExtendableContext) {
       return ctx.cookies.get(Jwt.options.tokenKey);
     },

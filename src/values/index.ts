@@ -43,12 +43,7 @@ export enum ParamsType {
 }
 
 /*
- * 缓存参数配置的键
- */
-export const ModelConfigCache = 'PARAMS_CONFIG_CACHE';
-
-/*
- * 参数数据类型
+ * Response状态值
  */
 export const StatusCode = {
   success: 200,
@@ -56,3 +51,8 @@ export const StatusCode = {
   authError: 408,
   serveError: 500
 };
+
+/*
+ * 缓存参数配置的键
+ */
+export const ModelConfigCache = 'PARAMS_CONFIG_CACHE';
