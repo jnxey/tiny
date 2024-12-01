@@ -564,7 +564,21 @@ type JwtOptionsInput = {
 
 #### Protected
 
-* 使用`Protected`装饰器
+* 使用`@Protected()`装饰器，配置后的方法将进行JWT验证
+```typescript
+import { Post, Protected } from 'koa-tiny';
+import { ExtendableContext, Next } from 'koa';
+import { YouPayload } from '....'
+
+export class Manager {
+  @Post()
+  @Protected()
+  public async index(ctx: ExtendableContext, next: Next, extend: DtoCtxExtend<null, YouPayload>) {
+    console.log(extend.payload)
+    // ...
+  }
+}
+```
 
 ### Dto
 
