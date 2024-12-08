@@ -1,28 +1,27 @@
 # Tiny
 
-## Introduction
+## 介绍
 
-* Tiny is a simple server-side tool library based on Node+Typescript+Koa2/ecosystem, with core code of less than 20K. It provides many interesting classes and decorators that can help you save time on configuring routes, validating parameters, setting login states, writing API documentation, and other additional functionalities.
+* Tiny是一个简单的、基于Node+Typescript+Koa2/生态的服务端工具库，它的核心代码只有不到20K，它提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置登录状态、编写API文档的时间，以及其他额外的功能。
 
-* Tiny aims to provide a simple tool library for developers, without involving deployment or operational content.
+* Tiny旨在提供一个简单的工具库给开发者使用，不涉及部署、运维相关内容。
 
-## Environment
+## 环境
 
 ![NODE Version][node-image]
 ![NPM Version][npm-image]
 
 [node-image]: https://camo.githubusercontent.com/48b3dcbb1bdec68f5587b58f71e7165fd5b624e01c8ba350369873da6e32cb56/68747470733a2f2f696d672e736869656c64732e696f2f6e6f64652f762f6d7174742e737667
-
 [npm-image]: https://camo.githubusercontent.com/b133c2aa426b98acd72f5aa52d309ba036a825616acf8994f1f2e115dbffe965/68747470733a2f2f696d672e736869656c64732e696f2f6e706d2f762f6d7174742e7376673f6c6f676f3d6e706d
 
-## Directory
+## 目录
 
-- [Introduction](#介绍)
-- [Environment](#环境)
-- [Directory](#目录)
-- [Installation](#安装)
-- [Usage](#使用)
-- [API Description](#API描述)
+- [介绍](#介绍)
+- [环境](#环境)
+- [目录](#目录)
+- [安装](#安装)
+- [使用](#使用)
+- [API描述](#API描述)
   - [Controller](#Controller)
     - [Controller](#Controller)
     - [Get](#Get)
@@ -61,36 +60,34 @@
     - [ParamsSource](#ParamsSource)
     - [ParamsType](#ParamsType)
     - [StatusCode](#StatusCode)
-- [Others](#其他)
+- [其他](#其他)
 
-## Installation
+## 安装
 
-* Before installation, please download and install Node.js. Node.js version 16.0.0 or higher is required.
+* 安装之前，请下载并安装 Node.js。需要 Node.js V16.0.0 或更高版本。
 
-### Creating a Tiny Application
+### 创建一个Tiny应用
 
-* You can create a project based on Tiny using the project template provided by Tiny, which sets up a simple project structure for your reference.
+* 创建基于Tiny的项目可以使用Tiny提供的项目模版，该模版设置了简单的项目结构，可供您参考。
 
 ```shell
 npm create koa-tiny <project-name>
 ```
 
-### Install Tiny in an existing project
+### 在已有项目中安装Tiny
 
 ```shell
 npm install --save koa-tiny
 ```
 
-### View current API information
+### 查看当前API信息
+* 若是使用Tiny模版构建的项目，可以访问`/doc.html`地址查看最简单的API信息
 
-* If the project is built using Tiny templates, you can access`/doc.html`the address to view the simplest API information
+## 使用
 
-## Usage
+### 初次使用示例
 
-### First-time usage example
-
-* File`index.ts`
-
+* 文件`index.ts`
 ```typescript
 import Tiny, { Controller } from 'koa-tiny';
 import Koa from 'koa';
@@ -111,9 +108,7 @@ Controller.connect<Manager>(new Manager(), router);
 
 app.listen(4000);
 ```
-
-* File`@/controller/manager.ts`
-
+* 文件`@/controller/manager.ts`
 ```typescript
 import { Json, Summary, Dto, StatusCode, Get } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -128,9 +123,7 @@ export class Manager {
   }
 }
 ```
-
-* `InitOptions`Parameter description
-
+* `InitOptions`参数说明
 ```typescript
 interface InitOptions {
   // 控制器配置参数
@@ -139,25 +132,21 @@ interface InitOptions {
   jwt?: JwtOptionsInput;
 }
 ```
+* ControllerOptionsInput的配置信息详见：[Controller](#Controller)
+* JwtOptionsInput的配置信息详见：[Jwt](#Jwt)
 
-* For configuration information of ControllerOptionsInput, see:[Controller](#Controller)
-* For configuration information of JwtOptionsInput, see:[Jwt](#Jwt)
-
-## API Description
+## API描述
 
 ### Controller
 
 #### Controller
 
-* Usage`Controller.connect<T>(instance: T, router: Router)`Controller class for connecting to the system
-
+* 使用`Controller.connect<T>(instance: T, router: Router)`连接系统的控制器类
 ```typescript
 // 连接你的控制器
 Controller.connect<Manager>(new Manager(), router);
 ```
-
-* Usage`Controller.options: ControllerOptionsInput`Get controller configuration items
-
+* 使用`Controller.options: ControllerOptionsInput`得到控制器配置项
 ```typescript
 // 打印配置
 console.log(Controller.options)
@@ -170,16 +159,12 @@ type ControllerOptionsInput = {
   hump?: boolean;
 };
 ```
-
-* Usage`Controller.apiInfoJson`Get JSON information of the API
-
+* 使用`Controller.apiInfoJson`得到API的JSON信息
 ```typescript
 // 打印JSON信息
 console.log(Controller.apiInfoJson)
 ```
-
-* Usage`Controller.jwtProtectedList`Get the list of routes protected by JWT
-
+* 使用`Controller.jwtProtectedList`得到jwt受到保护的路由列表
 ```typescript
 // 打印列表信息
 console.log(Controller.jwtProtectedList)
@@ -187,8 +172,7 @@ console.log(Controller.jwtProtectedList)
 
 #### Get
 
-* Usage`@Get()`Decorator to declare a Get method
-
+* 使用`@Get()`装饰器，声明一个Get方法
 ```typescript
 import { Get } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -203,8 +187,7 @@ export class Manager {
 
 #### Delete
 
-* Usage`@Delete()`Decorator to declare a Delete method
-
+* 使用`@Delete()`装饰器，声明一个Delete方法
 ```typescript
 import { Delete } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -219,8 +202,7 @@ export class Manager {
 
 #### Post
 
-* Usage`@Post()`Decorator to declare a Post method
-
+* 使用`@Post()`装饰器，声明一个Post方法
 ```typescript
 import { Post } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -235,8 +217,7 @@ export class Manager {
 
 #### Put
 
-* Usage`@Put()`Decorator to declare a Put method
-
+* 使用`@Put()`装饰器，声明一个Put方法
 ```typescript
 import { Put } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -251,8 +232,7 @@ export class Manager {
 
 #### View
 
-* Usage`@View()`Decorator to declare a View method
-
+* 使用`@View()`装饰器，声明一个View方法
 ```typescript
 import { View } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -267,8 +247,7 @@ export class Manager {
 
 #### Json
 
-* Usage`@Json(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
+* 使用`@Json(handler?: Router.Middleware)`装饰器，声明Body的数据类型
 ```typescript
 import { Post, Json } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -284,8 +263,7 @@ export class Manager {
 
 #### Text
 
-* Usage`@Text(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
+* 使用`@Text(handler?: Router.Middleware)`装饰器，声明Body的数据类型
 ```typescript
 import { Post, Text } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -301,8 +279,7 @@ export class Manager {
 
 #### FormUrlencoded
 
-* Usage`@FormUrlencoded(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
+* 使用`@FormUrlencoded(handler?: Router.Middleware)`装饰器，声明Body的数据类型
 ```typescript
 import { Post, FormUrlencoded } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -318,8 +295,7 @@ export class Manager {
 
 #### FormData
 
-* Usage`@FormData(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
+* 使用`@FormData(handler?: Router.Middleware)`装饰器，声明Body的数据类型
 ```typescript
 import { Post, FormData } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -335,8 +311,7 @@ export class Manager {
 
 #### Other
 
-* Usage`@Other(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
+* 使用`@Other(handler?: Router.Middleware)`装饰器，声明Body的数据类型
 ```typescript
 import { Post, Other } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -352,8 +327,7 @@ export class Manager {
 
 #### Prefix
 
-* Usage`@Prefix(text: string)`Decorator, set the prefix for a single route
-
+* 使用`@Prefix(text: string)`装饰器，设置单个路由的前缀
 ```typescript
 import { Post, Prefix } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -369,8 +343,7 @@ export class Manager {
 
 #### Mapping
 
-* Usage`@Mapping(path: string)`Decorator, reset the route address
-
+* 使用`@Mapping(path: string)`装饰器，重置路由地址
 ```typescript
 import { Post, Prefix } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -386,8 +359,7 @@ export class Manager {
 
 #### Summary
 
-* Usage`@Summary(text: string)`Decorator, set the description for the method
-
+* 使用`@Summary(text: string)`装饰器，给方法设置说明文旦
 ```typescript
 import { Post, Summary } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -405,8 +377,7 @@ export class Manager {
 
 #### Model
 
-* Usage`model<Model>.fill(map: object)`Fill data model
-
+* 使用`model<Model>.fill(map: object)`填充数据模型
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -423,8 +394,7 @@ if(result.valid) {
 }
 ```
 
-* Usage`model<Model>.getConfigCache`Get current model configuration
-
+* 使用`model<Model>.getConfigCache`获取当前模型配置
 ```typescript
 const input = new LoginInput();
 console.log(input.getConfigCache())
@@ -432,12 +402,11 @@ console.log(input.getConfigCache())
 
 ##### ModelResult
 
-* Usage`new ModelResult(valid: boolean, message?: string, value?: any)`Set model validation result
+* 使用`new ModelResult(valid: boolean, message?: string, value?: any)`设置模型校验结果
 
 #### Declare
 
-* Usage`@Declare(description?: string)`Decorator, declare parameters, note: model parameters must be used at least`Declare`
-
+* 使用`@Declare(description?: string)`装饰器，声明参数，注意：模型参数至少需要使用`Declare`
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -447,8 +416,7 @@ class LoginInput extends Model {
 
 #### Required
 
-* Usage`@Required(message?: string)`Decorator, set properties must
-
+* 使用`@Required(message?: string)`装饰器，设置属性必须
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -459,8 +427,7 @@ class LoginInput extends Model {
 
 #### TypeCheck
 
-* Usage`@TypeCheck(type: ParamsType | T, message?: string)`Decorator, set type checking
-
+* 使用`@TypeCheck(type: ParamsType | T, message?: string)`装饰器，设置类型检查
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -471,8 +438,7 @@ class LoginInput extends Model {
 
 #### ArrayCheck
 
-* Usage`@ArrayCheck(type: ParamsType | T, message?: string, maxLength?: number)`Decorator, set array type checking, precondition is`TypeCheck`Set`ParamsType.array`
-
+* 使用`@ArrayCheck(type: ParamsType | T, message?: string, maxLength?: number)`装饰器，设置数组类型检查，前置条件为`TypeCheck`设置`ParamsType.array`
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -484,8 +450,7 @@ class LoginInput extends Model {
 
 #### StringLength
 
-* Usage`@StringLength(range: number[], message?: string)`Decorator, set string length validation, precondition is`TypeCheck`Set`ParamsType.string`
-
+* 使用`@StringLength(range: number[], message?: string)`装饰器，设置字符串长度校验，前置条件为`TypeCheck`设置`ParamsType.string`
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -499,8 +464,7 @@ class LoginInput extends Model {
 
 #### Params
 
-* Usage`@Params<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1, P2>(p1: P1, p2: P2) => T)`Decorator, set input parameter validation
-
+* 使用`@Params<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1, P2>(p1: P1, p2: P2) => T)`装饰器，设置入参校验
 ```typescript
 import { Post, Params } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -526,8 +490,7 @@ export class Manager {
 
 #### Result
 
-* Usage`@Result<T extends Model>(result: { new (): T })`Decorator, set output parameter type
-
+* 使用`@Result<T extends Model>(result: { new (): T })`装饰器，设置出参类型
 ```typescript
 import { Post, Params, Dto, StatusCode } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -556,20 +519,15 @@ export class Manager {
 
 #### Jwt
 
-* Usage`Jwt.sign<T>(ctx: ExtendableContext, payload: T)`Generate token
-
+* 使用`Jwt.sign<T>(ctx: ExtendableContext, payload: T)`生成token
 ```typescript
 Jwt.sign<JwtPayload>(ctx, {...});
 ```
-
-* Usage`Jwt.verify<T>(ctx: ExtendableContext): T | null`Validate token
-
+* 使用`Jwt.verify<T>(ctx: ExtendableContext): T | null`验证token
 ```typescript
 const payload = Jwt.verify(ctx);
 ```
-
-* Usage`Jwt.options`Get controller configuration items
-
+* 使用`Jwt.options`得到控制器配置项
 ```typescript
 // 打印配置
 console.log(Jwt.options)
@@ -606,8 +564,7 @@ type JwtOptionsInput = {
 
 #### Protected
 
-* Usage`@Protected()`Decorator, the configured method will perform JWT validation
-
+* 使用`@Protected()`装饰器，配置后的方法将进行JWT验证
 ```typescript
 import { Post, Protected } from 'koa-tiny';
 import { ExtendableContext, Next } from 'koa';
@@ -627,18 +584,17 @@ export class Manager {
 
 #### Dto
 
-* Usage`new Dto({ code: number | string, result?: any, msg?: string })`Set Response return code
+* 使用`new Dto({ code: number | string, result?: any, msg?: string })`设置Response返回码
 
 #### DtoCtxExtend
 
-* Usage`new DtoCtxExtend<P1,P2>({ params: P1, payload: P2 })`Set ctx additional parameters (for internal use in Tiny)
+* 使用`new DtoCtxExtend<P1,P2>({ params: P1, payload: P2 })`设置ctx额外参数(Tiny内部使用)
 
 ### Values
 
 #### MethodType
 
-* Request type
-
+* 请求类型
 ```typescript
 export enum MethodType {
   get = 'get',
@@ -651,8 +607,7 @@ export enum MethodType {
 
 #### DataType
 
-* Data structure type of the body
-
+* body的数据结构类型
 ```typescript
 export enum DataType {
   json = 'application/json',
@@ -665,8 +620,7 @@ export enum DataType {
 
 #### ParamsSource
 
-* Parameter source
-
+* 参数来源
 ```typescript
 export enum ParamsSource {
   query = 'query',
@@ -676,8 +630,7 @@ export enum ParamsSource {
 
 #### ParamsType
 
-* Parameter data type
-
+* 参数数据类型
 ```typescript
 export enum ParamsType {
   number = 'number',
@@ -689,8 +642,7 @@ export enum ParamsType {
 
 #### StatusCode
 
-* Response status value
-
+* Response状态值
 ```typescript
 export const StatusCode = {
   success: 200,
@@ -700,4 +652,6 @@ export const StatusCode = {
 };
 ```
 
-## Others
+## 其他
+
+
