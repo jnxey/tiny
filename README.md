@@ -2,6 +2,8 @@
 
 ## Introduction
 
+* [简体中文](https://github.com/jnxey/tiny/blob/main/README_zh-CN.md)
+
 * Tiny is a simple server-side tool library based on Node+Typescript+Koa2/ecosystem, with core code of less than 20K. It provides many interesting classes and decorators that can help you save time on configuring routes, validating parameters, setting login states, writing API documentation, and other additional functionalities.
 
 * Tiny aims to provide a simple tool library for developers, without involving deployment or operational content.
