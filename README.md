@@ -17,12 +17,12 @@
 
 ## Directory
 
-- [Introduction](#介绍)
-- [Environment](#环境)
-- [Directory](#目录)
-- [Installation](#安装)
-- [Usage](#使用)
-- [API Description](#API描述)
+- [Introduction](#Introduction)
+- [Environment](#Environment)
+- [Directory](#Directory)
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [API Description](#API Description)
   - [Controller](#Controller)
     - [Controller](#Controller)
     - [Get](#Get)
@@ -61,7 +61,7 @@
     - [ParamsSource](#ParamsSource)
     - [ParamsType](#ParamsType)
     - [StatusCode](#StatusCode)
-- [Others](#其他)
+- [Others](#Others)
 
 ## Installation
 
