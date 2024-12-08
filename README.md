@@ -24,7 +24,7 @@
 - [Directory](#Directory)
 - [Installation](#Installation)
 - [Usage](#Usage)
-- [API Description](#API Description)
+- [API Description](#API%20Description)
   - [Controller](#Controller)
     - [Controller](#Controller)
     - [Get](#Get)
