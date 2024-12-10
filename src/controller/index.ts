@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { isObject, kebabCase, syncObjectData } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerOptionsInput } from '@/controller/types';
-import { MethodType, DataType } from '@/values';
+import { DataType, MethodType } from '@/values';
 
 export class Controller {
   public static options: ControllerOptions = {
@@ -11,7 +11,7 @@ export class Controller {
 
   public static jwtProtectedList: string[] = [];
 
-  public static apiInfoJson: object[] = [];
+  public static APIS_JSON: object[] = [];
 
   public static init(options: ControllerOptionsInput) {
     if (isObject(options)) syncObjectData(Controller.options, options);
@@ -25,6 +25,7 @@ export class Controller {
     const constructor = instance[constructorName];
     const connector = '/';
     const moduleName: string = constructor.name;
+    const describe: string = constructor.DESCRIBE;
     const methods: string[] = Object.getOwnPropertyNames(constructor.prototype);
     methods.forEach((name) => {
       if (name === constructorName) return;
@@ -37,7 +38,7 @@ export class Controller {
       if (handler.JWT_PROTECTED) {
         Controller.jwtProtectedList.push(path);
       }
-      const middleware = handler.DATA_TYPE_HANDLER;
+      const middleware = handler.HANDLER;
       if (handler.METHOD === MethodType.get) {
         middleware ? router.get(path, middleware, handler) : router.get(path, handler);
       } else if (handler.METHOD === MethodType.delete) {
@@ -46,16 +47,16 @@ export class Controller {
         middleware ? router.post(path, middleware, handler) : router.post(path, handler);
       } else if (handler.METHOD === MethodType.put) {
         middleware ? router.put(path, middleware, handler) : router.put(path, handler);
-      } else if (handler.METHOD === MethodType.view) {
-        middleware ? router.get(path, middleware, handler) : router.get(path, handler);
       }
       // 以下是接口信息
-      Controller.apiInfoJson.push({
+      Controller.APIS_JSON.push({
         module: module,
+        describe: describe,
         func: func,
         path: path,
         method: handler.METHOD,
-        dataType: handler.DATA_TYPE,
+        requestType: handler.REQUEST_TYPE,
+        responseType: handler.RESPONSE_TYPE,
         summary: handler.SUMMARY,
         paramsModel: handler.PARAMS_MODEL,
         resultModel: handler.RESULT_MODEL
@@ -101,61 +102,21 @@ export function Put(): Function {
 }
 
 /*
- * View装饰器
+ * 声明request/response的数据类型（Content-Type）
  */
-export function View(): Function {
+export function Type(requestType?: DataType, responseType?: DataType): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.METHOD = MethodType.view;
+    descriptor.value.REQUEST_TYPE = requestType ?? DataType.json;
+    descriptor.value.RESPONSE_TYPE = responseType ?? DataType.json;
   };
 }
 
 /*
- * body的数据结构为json
+ * 给Router设置中间件
  */
-export function Json(handler?: Router.Middleware): Function {
+export function Handler(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.json;
-    descriptor.value.DATA_TYPE_HANDLER = handler;
-  };
-}
-
-/*
- * body的数据结构为文本
- */
-export function Text(handler?: Router.Middleware): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.text;
-    descriptor.value.DATA_TYPE_HANDLER = handler;
-  };
-}
-
-/*
- * body的数据结构为FormUrlencoded
- */
-export function FormUrlencoded(handler?: Router.Middleware): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.formUrlencoded;
-    descriptor.value.DATA_TYPE_HANDLER = handler;
-  };
-}
-
-/*
- * body的数据结构为Form表单
- */
-export function FormData(handler?: Router.Middleware): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.formData;
-    descriptor.value.DATA_TYPE_HANDLER = handler;
-  };
-}
-
-/*
- * body的数据结构为other
- */
-export function Other(handler?: Router.Middleware): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.other;
-    descriptor.value.DATA_TYPE_HANDLER = handler;
+    descriptor.value.HANDLER = handler;
   };
 }
 

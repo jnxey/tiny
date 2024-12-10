@@ -5,8 +5,7 @@ export enum MethodType {
   get = 'get',
   delete = 'delete',
   post = 'post',
-  put = 'put',
-  view = 'view'
+  put = 'put'
 }
 
 /*
@@ -19,8 +18,11 @@ export enum MethodType {
 export enum DataType {
   json = 'application/json',
   text = 'text/plain',
+  html = 'text/html',
+  xml = 'text/xml',
   formUrlencoded = 'application/x-www-form-urlencoded',
   formData = 'multipart/form-data',
+  stream = 'application/octet-stream',
   other = 'other'
 }
 
