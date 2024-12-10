@@ -1,4 +1,4 @@
-import Tiny, { Controller, Jwt } from 'tiny.js';
+import Tiny, { Controller, Jwt } from '../lib/tiny.js';
 import jsonwebtoken from 'jsonwebtoken';
 import Router from '@koa/router';
 import { Home } from './confroller.test.js';
@@ -23,6 +23,10 @@ test('-----Tiny.init-----', () => {
 });
 
 test('-----Controller.connect-----', () => {
-  console.log(Controller.apiInfoJson);
-  expect(output(Controller.apiInfoJson)).toBe(['/api/home/index']);
+  expect(output(Controller.apiInfoJson[0]?.module)).toBe('Home');
+  expect(output(Controller.apiInfoJson[0]?.func)).toBe('index');
+  expect(output(Controller.apiInfoJson[0]?.path)).toBe('/api/Home/index');
+  expect(output(Controller.apiInfoJson[0]?.method)).toBe('get');
+  expect(output(Controller.apiInfoJson[0]?.dataType)).toBe('application/json');
+  expect(output(Controller.apiInfoJson[0]?.summary)).toBe('Describe');
 });
