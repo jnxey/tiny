@@ -8,10 +8,8 @@ export default {
   },
   plugins: [
     getBabelOutputPlugin({
-      plugins: [
-        ['@babel/plugin-proposal-decorators', { version: 'legacy' }],
-        ['@babel/plugin-transform-class-properties', { loose: true }]
-      ]
+      presets: [['@babel/preset-env']],
+      plugins: [['@babel/plugin-proposal-decorators', { version: 'legacy' }]]
     })
   ]
 };

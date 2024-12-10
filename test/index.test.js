@@ -9,13 +9,14 @@ import { Home } from './confroller.test.js';
 const port = 10101;
 const base = 'http://localhost:' + port;
 const app = new Koa();
-const router = new Router();
+const router = new Router({ prefix: '/users' });
 app.use(koaBody());
+router.prefix('/api');
 
 const output = (value) => value;
 
 Tiny.init({
-  controller: { prefix: '/api/', hump: false },
+  controller: { hump: false },
   jwt: { expiresIn: '4h', jsonwebtoken: jsonwebtoken }
 });
 
@@ -26,6 +27,8 @@ app.use(router.allowedMethods());
 
 const server = app.listen(port);
 
+// console.log(Controller.APIS_JSON);
+
 const findFuncJson = (module, func) => {
   let result = null;
   Controller.APIS_JSON.forEach((item) => {
@@ -35,19 +38,18 @@ const findFuncJson = (module, func) => {
 };
 
 test('-----Tiny.init-----', () => {
-  expect(output(Controller.options.prefix)).toBe('/api/');
   expect(output(Controller.options.hump)).toBe(false);
   expect(output(Jwt.options.expiresIn)).toBe('4h');
   expect(output(Jwt.options.jsonwebtoken)).toBe(jsonwebtoken);
 });
 
 test('-----Controller.connect-----', () => {
-  const homeIndex = findFuncJson('home', 'get');
-  expect(output(homeIndex?.path)).toBe('/api/home/get');
-  expect(output(homeIndex?.method)).toBe('get');
-  expect(output(homeIndex?.requestType)).toBe('application/json');
-  expect(output(homeIndex?.responseType)).toBe('application/json');
-  expect(output(homeIndex?.summary)).toBe('Describe');
+  const func = findFuncJson('home', 'get');
+  expect(output(func?.path)).toBe('/api/home/get');
+  expect(output(func?.method)).toBe('get');
+  expect(output(func?.requestType)).toBe('application/json');
+  expect(output(func?.responseType)).toBe('application/json');
+  expect(output(func?.summary)).toBe('Describe');
 });
 
 test('-----Get-----', async () => {
@@ -75,9 +77,29 @@ test('-----Delete-----', async () => {
 });
 
 test('-----Type-----', () => {
-  const homeType = findFuncJson('home', 'type');
-  expect(output(homeType?.requestType)).toBe('text/plain');
-  expect(output(homeType?.responseType)).toBe('application/json');
+  const func = findFuncJson('home', 'type');
+  expect(output(func?.requestType)).toBe('text/plain');
+  expect(output(func?.responseType)).toBe('application/json');
+});
+
+test('-----Handler-----', async () => {
+  const res = await axios.get(base + '/api/home/handler');
+  expect(output(res.status)).toBe(StatusCode.success);
+  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'handler' });
+});
+
+test('-----Mapping-----', async () => {
+  const res = await axios.get(base + '/api/home/mapping/1234');
+  expect(output(res.status)).toBe(StatusCode.success);
+  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: '1234' });
+});
+
+test('-----Summary-----', async () => {
+  const func = findFuncJson('home', 'summary');
+  expect(output(func.summary)).toBe('Summary Test');
+  const res = await axios.get(base + '/api/home/summary');
+  expect(output(res.status)).toBe(StatusCode.success);
+  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'summary' });
 });
 
 afterAll(() => {

@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Post, Put, Type, Handler, Prefix, Mapping, Summary } from '@/controller';
+import { Controller, Module, Delete, Get, Post, Put, Type, Handler, Mapping, Summary } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Dto, DtoCtxExtend } from '@/dto';
 import { Params, Result } from '@/params';
@@ -16,13 +16,13 @@ class Tiny {
 
 export {
   Controller,
+  Module,
   Get,
   Delete,
   Post,
   Put,
   Type,
   Handler,
-  Prefix,
   Mapping,
   Summary,
   // jwt

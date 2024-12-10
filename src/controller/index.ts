@@ -5,7 +5,6 @@ import { DataType, MethodType } from '@/values';
 
 export class Controller {
   public static options: ControllerOptions = {
-    prefix: '',
     hump: false
   };
 
@@ -25,16 +24,15 @@ export class Controller {
     const constructor = instance[constructorName];
     const connector = '/';
     const moduleName: string = constructor.name;
-    const describe: string = constructor.DESCRIBE;
+    const describe: string = constructor.MODULE_DESCRIBE;
     const methods: string[] = Object.getOwnPropertyNames(constructor.prototype);
     methods.forEach((name) => {
       if (name === constructorName) return;
       const handler: ControllerHandler = instance[name];
       const module = Controller.options.hump ? moduleName : kebabCase(moduleName);
       const func = Controller.options.hump ? name : kebabCase(name);
-      const prefix = handler.PREFIX || Controller.options.prefix;
-      const mapping = handler.MAPPING || module + connector + func;
-      const path = prefix + mapping;
+      const prefix = router.opts.prefix ?? '';
+      const path = handler.MAPPING || connector + module + connector + func;
       if (handler.JWT_PROTECTED) {
         Controller.jwtProtectedList.push(path);
       }
@@ -53,7 +51,7 @@ export class Controller {
         module: module,
         describe: describe,
         func: func,
-        path: path,
+        path: prefix + path,
         method: handler.METHOD,
         requestType: handler.REQUEST_TYPE,
         responseType: handler.RESPONSE_TYPE,
@@ -63,6 +61,15 @@ export class Controller {
       });
     });
   }
+}
+
+/*
+ * 声明模块并添加说明
+ */
+export function Module(text?: string): Function {
+  return function (target: Function) {
+    target['MODULE_DESCRIBE'] = text;
+  };
 }
 
 /*
@@ -117,15 +124,6 @@ export function Type(requestType?: DataType, responseType?: DataType): Function 
 export function Handler(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     descriptor.value.HANDLER = handler;
-  };
-}
-
-/*
- * 给模块方法设置单独的前缀
- */
-export function Prefix(text: string): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.PREFIX = text;
   };
 }
 

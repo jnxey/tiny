@@ -3,12 +3,10 @@ import { DataType, MethodType } from '@/values';
 import Router from '@koa/router';
 
 export type ControllerOptions = {
-  prefix: string;
   hump: boolean;
 };
 
 export type ControllerOptionsInput = {
-  prefix?: string;
   hump?: boolean;
 };
 
