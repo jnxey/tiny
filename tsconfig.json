@@ -13,7 +13,8 @@
     "emitDecoratorMetadata": true,
     "sourceMap": false,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "tiny.js": ["./lib/tiny.js"]
     }
   },
   "include": ["src/**/*.ts", "env.d.ts"]

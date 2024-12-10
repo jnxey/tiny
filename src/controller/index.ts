@@ -134,7 +134,7 @@ export function Text(handler?: Router.Middleware): Function {
  */
 export function FormUrlencoded(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.text;
+    descriptor.value.DATA_TYPE = DataType.formUrlencoded;
     descriptor.value.DATA_TYPE_HANDLER = handler;
   };
 }
@@ -144,7 +144,7 @@ export function FormUrlencoded(handler?: Router.Middleware): Function {
  */
 export function FormData(handler?: Router.Middleware): Function {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    descriptor.value.DATA_TYPE = DataType.text;
+    descriptor.value.DATA_TYPE = DataType.formData;
     descriptor.value.DATA_TYPE_HANDLER = handler;
   };
 }
