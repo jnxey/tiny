@@ -2,12 +2,12 @@ import { Controller, Module, Delete, Get, Post, Put, Type, Handler, Mapping, Sum
 import { Jwt, Protected } from '@/jwt';
 import { Dto, DtoCtxExtend } from '@/dto';
 import { Params, Result } from '@/params';
-import { Declare, Model, ModelResult, Required, TypeCheck, StringLength, ArrayCheck } from '@/model';
+import { Declare, Model, ModelResult, Required, TypeCheck, StringLength, ArrayCheck, TypeCustom } from '@/model';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ModelConfigCache, StatusCode } from '@/values';
 
 class Tiny {
-  // 初始化
+  // Init
   public static init(options: InitOptions): void {
     if (options.controller) Controller.init(options.controller);
     if (options.jwt) Jwt.init(options.jwt);
@@ -41,6 +41,7 @@ export {
   TypeCheck,
   StringLength,
   ArrayCheck,
+  TypeCustom,
   // values
   MethodType,
   DataType,

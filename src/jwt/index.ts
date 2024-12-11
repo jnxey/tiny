@@ -1,86 +1,63 @@
-import { copyAttrToNew, isObject, syncObjectData } from '@/tools';
-import { JwtOptions, JwtOptionsInput } from '@/jwt/types';
-import { ExtendableContext, Next } from 'koa';
-import { StatusCode } from '@/values';
-import { Dto, DtoCtxExtend } from '@/dto';
+import { copyAttrToNew } from '@/tools';
+import { JwtOptions, JwtOptionsContext, JwtOptionsIsResetToken, JwtOptionsRefuse, JwtOptionsSign, JwtOptionsVerify } from '@/jwt/types';
 
-/// Jwt构造函数
+/*
+ * Jwt constructor
+ */
 export class Jwt {
-  public static options: JwtOptions = {
-    jsonwebtoken: { verify: () => {}, sign: () => {} },
-    privateKey: 'shared-secret',
-    algorithms: 'HS256',
-    expiresIn: '24h',
-    ignoreExpiration: false,
-    errorCode: StatusCode.authError,
-    errorMsg: 'Unauthorized access',
-    tokenKey: 'token',
-    getToken: function (ctx: ExtendableContext) {
-      return ctx.cookies.get(Jwt.options.tokenKey);
-    },
-    setToken: function (ctx: ExtendableContext, value: string) {
-      return ctx.cookies.set(Jwt.options.tokenKey, value);
-    },
-    isResetToken: () => false
-  };
+  /*
+   * Obtain the context required for JWT through the parameters of the handler
+   */
+  public static context: JwtOptionsContext = (args) => args;
 
   /*
-   * 初始化jwt配置
+   * Method for executing JWT verification after failure
    */
-  public static init(options: JwtOptionsInput) {
-    if (isObject(options)) syncObjectData(Jwt.options, options);
-  }
+  public static refuse: JwtOptionsRefuse = (args) => args;
 
   /*
-   * 验证token
+   * Perform JWT signature
    */
-  public static verify<T>(ctx: ExtendableContext): T | null {
-    const token = Jwt.options.getToken(ctx);
-    if (!token) return null;
-    try {
-      return Jwt.options.jsonwebtoken.verify(token, Jwt.options.privateKey);
-    } catch (err) {
-      return null;
-    }
-  }
+  public static sign: JwtOptionsSign = () => null;
 
   /*
-   * 生成token
+   * Perform JWT verification
    */
-  public static sign<T>(ctx: ExtendableContext, payload: T): string {
-    if (isObject(payload)) {
-      delete payload['iat'];
-      delete payload['exp'];
-    }
-    const token = Jwt.options.jsonwebtoken.sign({ ...payload }, Jwt.options.privateKey, {
-      algorithm: Jwt.options.algorithms,
-      expiresIn: Jwt.options.expiresIn
-    });
-    Jwt.options.setToken(ctx, token);
-    return token;
+  public static verify: JwtOptionsVerify = () => null;
+
+  /*
+   * After successful verification, determine whether JWT signature needs to be re signed
+   */
+  public static isResetToken: JwtOptionsIsResetToken = () => false;
+
+  /*
+   * Initialize JWT configuration
+   */
+  public static init(options: JwtOptions) {
+    if (options.context) Jwt.context = options.context;
+    if (options.refuse) Jwt.refuse = options.refuse;
+    if (options.sign) Jwt.sign = options.sign;
+    if (options.verify) Jwt.verify = options.verify;
+    if (options.isResetToken) Jwt.isResetToken = options.isResetToken;
   }
 }
 
 /*
- * JWT装饰器-保护
+ * JWT Decorator
+ * After using this decorator, JWT verification will be conducted
  */
 export function Protected(): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     const func: Function = descriptor.value;
     descriptor.value = function (): any {
       const args = arguments;
-      const ctx: ExtendableContext = args[0];
-      const next: Next = args[1];
-      const payload = Jwt.verify(ctx);
-      if (payload) {
-        if (Jwt.options.isResetToken(ctx)) {
-          Jwt.sign(ctx, payload);
-        }
-        const extend = new DtoCtxExtend({ ...(args[2] || {}), payload: payload });
-        return func.call(this, ctx, next, extend);
+      const context = Jwt.context(args);
+      const payload = Jwt.verify(context);
+      if (!!payload) {
+        if (Jwt.isResetToken(payload)) Jwt.sign(context, payload);
+        return func.call(this, args);
       } else {
-        ctx.body = new Dto({ code: Jwt.options.errorCode, msg: Jwt.options.errorMsg });
-        return next();
+        return Jwt.refuse(args);
       }
     };
     copyAttrToNew(descriptor.value, func);

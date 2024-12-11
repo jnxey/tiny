@@ -1,25 +1,59 @@
-import Router from '@koa/router';
-import { isObject, kebabCase, syncObjectData } from '@/tools';
-import { ControllerHandler, ControllerOptions, ControllerOptionsInput } from '@/controller/types';
+import { kebabCase } from '@/tools';
+import { ControllerHandler, ControllerOptions, ControllerRouterFunc } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
 
 export class Controller {
-  public static options: ControllerOptions = {
-    hump: false
-  };
+  /*
+   * Routing prefix
+   */
+  public static prefix: string = '';
 
-  public static jwtProtectedList: string[] = [];
+  /*
+   * Format module or method names
+   */
+  public static format: boolean = true;
 
-  public static APIS_JSON: object[] = [];
+  /*
+   * Get Route Mapping
+   */
+  public static get: ControllerRouterFunc = () => {};
 
-  public static init(options: ControllerOptionsInput) {
-    if (isObject(options)) syncObjectData(Controller.options, options);
+  /*
+   * Post Route Mapping
+   */
+  public static post: ControllerRouterFunc = () => {};
+
+  /*
+   * Delete Route Mapping
+   */
+  public static delete: ControllerRouterFunc = () => {};
+
+  /*
+   * Put Route Mapping
+   */
+  public static put: ControllerRouterFunc = () => {};
+
+  /*
+   * Apis JSON
+   */
+  public static apisJSON: object[] = [];
+
+  /*
+   * Init
+   */
+  public static init(options: ControllerOptions) {
+    if (options.prefix) Controller.prefix = options.prefix;
+    if (options.format) Controller.format = options.format;
+    if (options.get) Controller.get = options.get;
+    if (options.post) Controller.post = options.post;
+    if (options.put) Controller.put = options.put;
   }
 
   /*
-   * 连接控制器
+   * Connect the controller
+   * If a method in a class does not use any decorator from [Get, Post, Delete, Put], it will not be considered a Restful method
    */
-  public static connect<T>(instance: T, router: Router): void {
+  public static connect<T>(instance: T): void {
     const constructorName = 'constructor';
     const constructor = instance[constructorName];
     const connector = '/';
@@ -29,29 +63,27 @@ export class Controller {
     methods.forEach((name) => {
       if (name === constructorName) return;
       const handler: ControllerHandler = instance[name];
-      const module = Controller.options.hump ? moduleName : kebabCase(moduleName);
-      const func = Controller.options.hump ? name : kebabCase(name);
-      const prefix = router.opts.prefix ?? '';
-      const path = handler.MAPPING || connector + module + connector + func;
-      if (handler.JWT_PROTECTED) {
-        Controller.jwtProtectedList.push(path);
-      }
+      if (!handler.METHOD) return;
+      const module = Controller.format ? kebabCase(moduleName) : moduleName;
+      const func = Controller.format ? kebabCase(name) : name;
+      const prefix = Controller.prefix;
+      const path = handler.MAPPING || prefix + connector + module + connector + func;
       const middleware = handler.HANDLER;
       if (handler.METHOD === MethodType.get) {
-        middleware ? router.get(path, middleware, handler) : router.get(path, handler);
+        Controller.get(path, handler, middleware);
       } else if (handler.METHOD === MethodType.delete) {
-        middleware ? router.del(path, middleware, handler) : router.del(path, handler);
+        Controller.delete(path, handler, middleware);
       } else if (handler.METHOD === MethodType.post) {
-        middleware ? router.post(path, middleware, handler) : router.post(path, handler);
+        Controller.post(path, handler, middleware);
       } else if (handler.METHOD === MethodType.put) {
-        middleware ? router.put(path, middleware, handler) : router.put(path, handler);
+        Controller.put(path, handler, middleware);
       }
       // 以下是接口信息
-      Controller.APIS_JSON.push({
+      Controller.apisJSON.push({
         module: module,
         describe: describe,
         func: func,
-        path: prefix + path,
+        path: path,
         method: handler.METHOD,
         requestType: handler.REQUEST_TYPE,
         responseType: handler.RESPONSE_TYPE,
@@ -64,7 +96,7 @@ export class Controller {
 }
 
 /*
- * 声明模块并添加说明
+ * Declare the module and add a description
  */
 export function Module(text?: string): Function {
   return function (target: Function) {
@@ -73,74 +105,74 @@ export function Module(text?: string): Function {
 }
 
 /*
- * Get装饰器
+ * Get Decorator
  */
 export function Get(): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.METHOD = MethodType.get;
   };
 }
 
 /*
- * Delete装饰器
+ * Delete Decorator
  */
 export function Delete(): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.METHOD = MethodType.delete;
   };
 }
 
 /*
- * Post装饰器
+ * Post Decorator
  */
 export function Post(): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.METHOD = MethodType.post;
   };
 }
 
 /*
- * Put装饰器
+ * Put Decorator
  */
 export function Put(): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.METHOD = MethodType.put;
   };
 }
 
 /*
- * 声明request/response的数据类型（Content-Type）
+ * Declare request/response Content-Type
  */
 export function Type(requestType?: DataType, responseType?: DataType): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.REQUEST_TYPE = requestType ?? DataType.json;
     descriptor.value.RESPONSE_TYPE = responseType ?? DataType.json;
   };
 }
 
 /*
- * 给Router设置中间件
+ * Router Middleware
  */
-export function Handler(handler?: Router.Middleware): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+export function Handler(handler?: Function): Function {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.HANDLER = handler;
   };
 }
 
 /*
- * Mapping地址映射
+ * Mapping Address Mapping
  */
 export function Mapping(path: string): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.MAPPING = path;
   };
 }
 
 /*
- * 对模块方法进行说明
+ * Explain the module method
  */
 export function Summary(text: string): Function {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.SUMMARY = text;
   };
 }

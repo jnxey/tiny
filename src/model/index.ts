@@ -1,78 +1,82 @@
 import { ModelConfigCache, ParamsType } from '@/values';
 import { isArray, isBoolean, isDate, isEmpty, isString } from '@/tools';
+import { ModelConfig } from '@/model/types';
 
 /*
- * 参数模型
+ * Data Model
  */
 export class Model {
-  // 默认值
-  public static def = {
-    number: 0,
-    boolean: true,
-    string: '',
-    null: null
-  };
+  /*
+   * Define initial default values
+   */
+  public static def = { number: 0, boolean: true, string: '', null: null };
 
-  // 获取config
-  public getConfigCache() {
-    return this.constructor[ModelConfigCache];
-  }
-
-  // 检查类型方法
-  public static checkType(config, value): ModelResult {
+  /*
+   * Check type method
+   */
+  public static checkType(config: ModelConfig, value): ModelResult {
     const hasNull = isEmpty(value);
-    if (config.required && hasNull) {
-      return new ModelResult(false, config.requiredMessage);
-    }
+    if (config.required && hasNull) return new ModelResult(false, config.requiredMessage);
     if (!hasNull && config.type === ParamsType.array) {
       if (!isArray(value)) return new ModelResult(false, config.typeErrorMessage);
-      if (value.length > config.arrayMaxLength) return new ModelResult(false, 'Array exceeds limit');
+      if (value.length > (config.arrayMaxLength ?? 0)) return new ModelResult(false, config.arrayMaxLengthMessage);
       const array: any[] = [];
       for (let i = 0; i < value.length; i++) {
         const item = value[i];
         const _result = Model.checkType({ type: config.arrayType, typeErrorMessage: config.arrayTypeErrorMessage }, item);
-        if (_result?.valid) {
-          array.push(_result.value);
-        } else {
-          return _result;
-        }
+        if (!_result?.valid) return _result;
+        array.push(_result.value);
       }
       value = array;
     }
-    if (!hasNull && config.type === ParamsType.number && isNaN(parseFloat(value))) {
-      return new ModelResult(false, config.typeErrorMessage);
-    } else if (!hasNull && config.type === ParamsType.number) {
-      value = parseFloat(value); // 数字为 字符串数字 时，做处理
+    // number
+    if (!hasNull && config.type === ParamsType.number) {
+      value = Number(value); // When the number is a string number, perform processing
+      if (isNaN(value)) return new ModelResult(false, config.typeErrorMessage);
     }
+    // boolean
     if (!hasNull && config.type === ParamsType.boolean && !isBoolean(value)) {
       return new ModelResult(false, config.typeErrorMessage);
     }
-    if (!hasNull && config.type === ParamsType.string && isDate(value)) {
-      value = String(value); // 日期类型 先转 字符串
-    }
-    if (!hasNull && config.type === ParamsType.string && !isString(value)) {
-      return new ModelResult(false, config.typeErrorMessage);
-    } else if (config.stringRange) {
-      const min = config.stringRange[0];
-      const max = config.stringRange[1];
-      if (value.length < min && value.length > max) {
-        return new ModelResult(false, config.stringRangeMessage);
+    // string
+    if (!hasNull && config.type === ParamsType.string) {
+      if (isDate(value)) value = String(value); // Date type converted to string first
+      if (!isString(value)) return new ModelResult(false, config.typeErrorMessage);
+      if (config.stringRange) {
+        // string range
+        const min = config.stringRange[0];
+        const max = config.stringRange[1];
+        if (value.length < min || value.length > max) {
+          return new ModelResult(false, config.stringRangeMessage);
+        }
       }
     }
-    if (!hasNull && Model.prototype.isPrototypeOf(config.type?.prototype)) {
+    // Model Constructor
+    if (!hasNull && typeof config.type === 'function' && Model.prototype.isPrototypeOf(config.type?.prototype)) {
       const model = new config.type();
-      const result: ModelResult = model.fill(value);
-      if (result.valid) {
-        value = result.value;
-      } else {
-        return result;
-      }
+      const result = model.fill(value);
+      if (!result.valid) return result;
+      value = result.value;
     }
-    return new ModelResult(true, '', value);
+    // custom
+    if (!hasNull && typeof config.typeCustom === 'function') {
+      const result = config.typeCustom(value);
+      if (!result.valid) return result;
+      value = result.value;
+    }
+
+    return new ModelResult(true, 'success', value);
   }
 
-  // 填充
-  public fill<T>(map: object) {
+  /*
+   * Get the current data model configuration
+   */
+  public getConfigCache() {
+    return this.constructor[ModelConfigCache];
+  }
+
+  // Fill in data based on type
+  public fill<T = object>(map: T): ModelResult {
     const modelConfig = this.constructor[ModelConfigCache];
     if (!modelConfig) return new ModelResult(true);
     for (let name in modelConfig) {
@@ -82,12 +86,12 @@ export class Model {
       if (!result?.valid) return result;
       this[name] = result.value;
     }
-    return new ModelResult(true, '', this);
+    return new ModelResult(true, 'success', this);
   }
 }
 
 /*
- * 返回结果
+ * Model verification or filling returns results
  */
 export class ModelResult {
   public valid: boolean = false;
@@ -102,7 +106,7 @@ export class ModelResult {
 }
 
 /**
- * 添加参数声明，以及描述提示语
+ * Add attribute declarations and descriptive prompts
  */
 export function Declare(description?: string): Function {
   return function (target: any, propertyKey: string) {
@@ -112,7 +116,7 @@ export function Declare(description?: string): Function {
 }
 
 /**
- * 添加参数提示语
+ * Setting attribute cannot be empty (nul, undefined, '')
  */
 export function Required(message?: string): Function {
   return function (target: any, propertyKey: string) {
@@ -123,7 +127,7 @@ export function Required(message?: string): Function {
 }
 
 /**
- * 添加类型错误提示语
+ * Set attribute type
  */
 export function TypeCheck<T>(type: ParamsType | T, message?: string): Function {
   return function (target: any, propertyKey: string) {
@@ -134,19 +138,20 @@ export function TypeCheck<T>(type: ParamsType | T, message?: string): Function {
 }
 
 /**
- * 设置此字段为数组类型
+ * When the `type` in `TypeCheck` is `ParamsType.array`, this decorator can be set to verify the type of array content
  */
-export function ArrayCheck<T>(type: ParamsType | T, message?: string, maxLength?: number): Function {
+export function ArrayCheck<T>(type: ParamsType | T, message?: string, maxLength?: number, maxLengthMessage?: string): Function {
   return function (target: any, propertyKey: string) {
     _checkParamsConfigExist(target, propertyKey);
     target.constructor[ModelConfigCache][propertyKey].arrayType = type;
     target.constructor[ModelConfigCache][propertyKey].arrayTypeErrorMessage = message;
     target.constructor[ModelConfigCache][propertyKey].arrayMaxLength = maxLength ?? 1000;
+    target.constructor[ModelConfigCache][propertyKey].arrayMaxLengthMessage = maxLengthMessage ?? 'Array exceeds limit';
   };
 }
 
 /**
- * 添加类型错误提示语
+ * When the `type in `TypeCheck` is `ParamsType.string`, this decorator can be set to check the length of the string
  */
 export function StringLength<T>(range: number[], message?: string): Function {
   return function (target: any, propertyKey: string) {
@@ -157,7 +162,17 @@ export function StringLength<T>(range: number[], message?: string): Function {
 }
 
 /**
- * 检查参数配置是否存在
+ * Set custom verification method
+ */
+export function TypeCustom<T>(valid: (value: T) => ModelResult): Function {
+  return function (target: any, propertyKey: string) {
+    _checkParamsConfigExist(target, propertyKey);
+    target.constructor[ModelConfigCache][propertyKey].typeCustom = valid;
+  };
+}
+
+/**
+ * Check if the attribute configuration exists
  */
 function _checkParamsConfigExist(target: any, propertyKey: string) {
   if (!target.constructor[ModelConfigCache]) target.constructor[ModelConfigCache] = {};

@@ -1,17 +1,18 @@
-import { ExtendableContext, Next } from 'koa';
 import { DataType, MethodType } from '@/values';
-import Router from '@koa/router';
+
+export type ControllerRouterFunc = (path: string, handler: Function, middleware?: Function) => void;
 
 export type ControllerOptions = {
-  hump: boolean;
-};
-
-export type ControllerOptionsInput = {
-  hump?: boolean;
+  prefix?: string;
+  format?: boolean;
+  get?: ControllerRouterFunc;
+  post?: ControllerRouterFunc;
+  delete?: ControllerRouterFunc;
+  put?: ControllerRouterFunc;
 };
 
 export interface ControllerHandler {
-  (ctx: ExtendableContext, next: Next): number;
+  <T>(): T;
   METHOD?: MethodType;
   REQUEST_TYPE?: DataType;
   RESPONSE_TYPE?: DataType;
@@ -19,7 +20,7 @@ export interface ControllerHandler {
   MAPPING?: string;
   SUMMARY?: string;
   JWT_PROTECTED?: boolean;
-  HANDLER?: Router.Middleware;
+  HANDLER?: Function;
   PARAMS_MODEL?: object;
   RESULT_MODEL?: object;
 }

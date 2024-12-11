@@ -1,29 +1,17 @@
-import { ExtendableContext } from 'koa';
+export type JwtOptionsContext = <HandlerArgs, Context>(args: HandlerArgs) => Context | HandlerArgs;
+
+export type JwtOptionsRefuse = <HandlerArgs, RefuseResult>(args: HandlerArgs) => RefuseResult | HandlerArgs;
+
+export type JwtOptionsSign = <Context, Payload, Token = string>(context: Context, payload: Payload) => Token | null;
+
+export type JwtOptionsVerify = <Context, VerifyResult>(context: Context) => VerifyResult | null;
+
+export type JwtOptionsIsResetToken = <Payload>(payload: Payload) => boolean;
 
 export type JwtOptions = {
-  jsonwebtoken: { verify: Function; sign: Function };
-  privateKey: string;
-  algorithms: string;
-  expiresIn: string;
-  ignoreExpiration: boolean;
-  errorCode: number;
-  errorMsg: string;
-  tokenKey: string;
-  getToken: (ctx: ExtendableContext) => string | undefined;
-  setToken: (ctx: ExtendableContext, value: string) => any;
-  isResetToken: (ctx: ExtendableContext) => boolean;
-};
-
-export type JwtOptionsInput = {
-  jsonwebtoken: { verify: Function; sign: Function };
-  privateKey?: string;
-  algorithms?: string;
-  expiresIn?: string;
-  ignoreExpiration?: boolean;
-  errorCode?: number;
-  errorMsg?: string;
-  tokenKey?: string;
-  getToken?: (ctx: ExtendableContext) => string | undefined;
-  setToken?: (ctx: ExtendableContext, value: string) => any;
-  isResetToken?: (ctx: ExtendableContext) => boolean;
+  context?: JwtOptionsContext;
+  refuse?: JwtOptionsRefuse;
+  verify?: JwtOptionsVerify;
+  sign?: JwtOptionsSign;
+  isResetToken?: JwtOptionsIsResetToken;
 };

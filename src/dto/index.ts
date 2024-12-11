@@ -14,24 +14,3 @@ export class Dto {
     this.result = result;
   }
 }
-
-/*
- * ctx额外参数设置
- */
-export class DtoCtxExtend<P1 = any, P2 = any> {
-  public params!: P1;
-  public payload!: P2;
-
-  constructor({ params, payload }) {
-    if (!!params) this.setParams(params);
-    if (!!payload) this.setPayload(payload);
-  }
-
-  setParams(params: P1) {
-    this.params = params;
-  }
-
-  setPayload(payload: P2) {
-    this.payload = payload;
-  }
-}
