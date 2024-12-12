@@ -1,15 +1,16 @@
-export type JwtOptionsContext = <HandlerArgs, Context>(args: HandlerArgs) => Context | HandlerArgs;
+export type JwtOptionsArgs = any[] | IArguments;
 
-export type JwtOptionsRefuse = <HandlerArgs, RefuseResult>(args: HandlerArgs) => RefuseResult | HandlerArgs;
+export type JwtOptionsSign = <Payload, Token = string>(args: JwtOptionsArgs, payload: Payload) => Token | null;
 
-export type JwtOptionsSign = <Context, Payload, Token = string>(context: Context, payload: Payload) => Token | null;
+export type JwtOptionsVerify = <VerifyResult>(args: JwtOptionsArgs) => VerifyResult | null;
 
-export type JwtOptionsVerify = <Context, VerifyResult>(context: Context) => VerifyResult | null;
+export type JwtOptionsInject = <Payload>(args: JwtOptionsArgs, payload: Payload) => JwtOptionsArgs;
+
+export type JwtOptionsRefuse = <RefuseResult>(args: JwtOptionsArgs) => RefuseResult | null;
 
 export type JwtOptionsIsResetToken = <Payload>(payload: Payload) => boolean;
 
 export type JwtOptions = {
-  context?: JwtOptionsContext;
   refuse?: JwtOptionsRefuse;
   verify?: JwtOptionsVerify;
   sign?: JwtOptionsSign;

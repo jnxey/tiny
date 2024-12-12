@@ -1,5 +1,5 @@
 /*
- * 请求方法装饰器
+ * Request method type
  */
 export enum MethodType {
   get = 'get',
@@ -9,7 +9,7 @@ export enum MethodType {
 }
 
 /*
- * body的数据结构
+ * Content-type
  * json: 'application/json',
  * text: 'text/xml',
  * formData: 'application/x-www-form-urlencoded',
@@ -27,7 +27,7 @@ export enum DataType {
 }
 
 /*
- * 参数来源
+ * Parameter source
  */
 export enum ParamsSource {
   query = 'query',
@@ -35,7 +35,7 @@ export enum ParamsSource {
 }
 
 /*
- * 参数数据类型
+ * Parameter data type
  */
 export enum ParamsType {
   number = 'number',
@@ -45,7 +45,7 @@ export enum ParamsType {
 }
 
 /*
- * Response状态值
+ * Http Code value
  */
 export const StatusCode = {
   success: 200,
@@ -55,6 +55,6 @@ export const StatusCode = {
 };
 
 /*
- * 缓存参数配置的键
+ * Cache parameter configuration key
  */
 export const ModelConfigCache = 'PARAMS_CONFIG_CACHE';

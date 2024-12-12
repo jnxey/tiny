@@ -1,20 +1,18 @@
 import { Controller, Module, Delete, Get, Post, Put, Type, Handler, Mapping, Summary } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
-import { Dto, DtoCtxExtend } from '@/dto';
-import { Params, Result } from '@/params';
+import { Dto } from '@/dto';
+import { Params } from '@/params';
 import { Declare, Model, ModelResult, Required, TypeCheck, StringLength, ArrayCheck, TypeCustom } from '@/model';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ModelConfigCache, StatusCode } from '@/values';
 
-class Tiny {
-  // Init
-  public static init(options: InitOptions): void {
+const Tiny = {
+  init: (options: InitOptions): void => {
     if (options.controller) Controller.init(options.controller);
     if (options.jwt) Jwt.init(options.jwt);
-  }
-}
-
-export {
+    if (options.params) Params.init(options.params);
+  },
+  // controller
   Controller,
   Module,
   Get,
@@ -30,10 +28,7 @@ export {
   Protected,
   // dto
   Dto,
-  DtoCtxExtend,
-  // params
-  Params,
-  Result,
+  // model
   Model,
   ModelResult,
   Declare,
@@ -42,6 +37,8 @@ export {
   StringLength,
   ArrayCheck,
   TypeCustom,
+  // params
+  Params,
   // values
   MethodType,
   DataType,

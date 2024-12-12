@@ -1,5 +1,5 @@
 /**
- * 判断数据类型
+ * Determine data type
  */
 export const getType = (value: any): string => Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
 export const isNumber = (value: any): boolean => getType(value) === 'number';
@@ -17,14 +17,14 @@ export const isDate = (value: any): boolean => getType(value) === 'date';
 export const isEmpty = (value: any): boolean => value === undefined || value === '' || value === null;
 
 /**
- * 校验数据类型
+ * Throwing an error
  */
 export function warn(msg: string) {
   throw new Error(msg);
 }
 
 /**
- * 驼峰命名=>中横线命名
+ * Hump naming=>Middle line naming
  */
 export function kebabCase(name: string): string {
   if (!isString(name)) warn('Name must be a string');
@@ -33,7 +33,7 @@ export function kebabCase(name: string): string {
 }
 
 /**
- *  中横线命名=>驼峰命名
+ *  Middle horizontal line naming=>Hump naming
  */
 export function camelCase(name: string): string {
   if (!isString(name)) warn('Name must be a string');
@@ -47,7 +47,7 @@ export function camelCase(name: string): string {
 }
 
 /**
- *  获取json
+ *  Get JSON
  */
 export function getJSON(value?: string, def?: any) {
   if (!value) return def;
@@ -59,7 +59,7 @@ export function getJSON(value?: string, def?: any) {
 }
 
 /**
- *  给表单数据赋值
+ *  Synchronize object data
  */
 export function syncObjectData(target: object, remote: object) {
   Object.keys(target).forEach(function (name: string) {
@@ -68,7 +68,7 @@ export function syncObjectData(target: object, remote: object) {
 }
 
 /**
- *  复制方法的属性给新的方法
+ *  Copy the properties of a method to a new method
  */
 export function copyAttrToNew(fn1: Function, fn2: Function) {
   Object.keys(fn2).forEach(function (name: string) {
