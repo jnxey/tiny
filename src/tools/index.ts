@@ -14,6 +14,7 @@ export const isPromise = (value: any): boolean => getType(value) === 'promise';
 export const isNode = (value: any): boolean => !isNull(value) && !isUndefined(value) && Boolean(value.nodeName) && Boolean(value.nodeType);
 export const isElement = (value: any): boolean => isNode(value) && value.nodeType === 1;
 export const isDate = (value: any): boolean => getType(value) === 'date';
+export const isRegexp = (value: any): boolean => getType(value) === 'regexp';
 export const isEmpty = (value: any): boolean => value === undefined || value === '' || value === null;
 
 /**
@@ -74,4 +75,30 @@ export function copyAttrToNew(fn1: Function, fn2: Function) {
   Object.keys(fn2).forEach(function (name: string) {
     fn1[name] = fn2[name];
   });
+}
+
+/**
+ *  Analyze routing parameters
+ */
+export function parseRoute(url: string, routePattern: string): object | null {
+  // Replace the parameter part in routePattern with the capture group in the regular expression
+  const routeRegex = new RegExp(`^${routePattern.replace(/:\w+/g, '([^/]+)')}$`);
+  const match = url.match(routeRegex);
+
+  if (match) {
+    // Create an object to store parameters
+    const params = {};
+    const paramNames = routePattern.match(/:\w+/g);
+
+    if (paramNames) {
+      paramNames.forEach((paramName, index) => {
+        // Remove the colon before the parameter name
+        const paramKey = paramName.slice(1);
+        params[paramKey] = match[index + 1];
+      });
+    }
+    return params;
+  } else {
+    return null; // No match found
+  }
 }

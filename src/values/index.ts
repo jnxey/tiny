@@ -2,10 +2,12 @@
  * Request method type
  */
 export enum MethodType {
-  get = 'get',
-  delete = 'delete',
-  post = 'post',
-  put = 'put'
+  head = 'HEAD',
+  options = 'OPTIONS',
+  get = 'GET',
+  delete = 'DELETE',
+  post = 'POST',
+  put = 'PUT'
 }
 
 /*
@@ -22,7 +24,6 @@ export enum DataType {
   xml = 'text/xml',
   formUrlencoded = 'application/x-www-form-urlencoded',
   formData = 'multipart/form-data',
-  stream = 'application/octet-stream',
   other = 'other'
 }
 

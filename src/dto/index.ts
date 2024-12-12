@@ -1,7 +1,9 @@
 import { DtoInput } from '@/dto/types';
+import { ServerResponse } from 'http';
+import { DataType, StatusCode } from '@/values';
 
 /*
- * Response返回码
+ * Response Dto
  */
 export class Dto {
   public code: string | number;
@@ -12,5 +14,14 @@ export class Dto {
     this.code = code;
     this.msg = msg;
     this.result = result;
+  }
+
+  public static send(res: ServerResponse, params: DtoInput) {
+    res.writeHead(StatusCode.success, { 'Content-Type': DataType.json });
+    res.end(JSON.stringify(params));
+  }
+
+  value(params: DtoInput) {
+    return JSON.stringify(params);
   }
 }

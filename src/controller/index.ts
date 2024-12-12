@@ -1,6 +1,9 @@
 import { kebabCase } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerRouterFunc } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
+import { Router } from '@/router';
+import { RouterRequest } from '@/router/types';
+import { ServerResponse } from 'http';
 
 export class Controller {
   /*
@@ -14,24 +17,44 @@ export class Controller {
   public static format: boolean = true;
 
   /*
-   * Get Route Mapping
+   * Get Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static get: ControllerRouterFunc = () => {};
+  public static get: ControllerRouterFunc = (path, handler, middleware) => {
+    Router.register(path, MethodType.get, (req: RouterRequest, res: ServerResponse) => {
+      if (middleware) middleware(req, res);
+      handler(req, res);
+    });
+  };
 
   /*
-   * Post Route Mapping
+   * Post Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static post: ControllerRouterFunc = () => {};
+  public static post: ControllerRouterFunc = (path, handler, middleware) => {
+    Router.register(path, MethodType.post, (req: RouterRequest, res: ServerResponse) => {
+      if (middleware) middleware(req, res);
+      handler(req, res);
+    });
+  };
 
   /*
-   * Delete Route Mapping
+   * Delete Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static delete: ControllerRouterFunc = () => {};
+  public static delete: ControllerRouterFunc = (path, handler, middleware) => {
+    Router.register(path, MethodType.delete, (req: RouterRequest, res: ServerResponse) => {
+      if (middleware) middleware(req, res);
+      handler(req, res);
+    });
+  };
 
   /*
-   * Put Route Mapping
+   * Put Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static put: ControllerRouterFunc = () => {};
+  public static put: ControllerRouterFunc = (path, handler, middleware) => {
+    Router.register(path, MethodType.put, (req: RouterRequest, res: ServerResponse) => {
+      if (middleware) middleware(req, res);
+      handler(req, res);
+    });
+  };
 
   /*
    * Apis JSON

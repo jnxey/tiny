@@ -1,52 +1,82 @@
-import Tiny, { Controller, Jwt, StatusCode } from '../lib/tiny.js';
-import jsonwebtoken from 'jsonwebtoken';
-import Koa from 'koa';
-import Router from '@koa/router';
-import { koaBody } from 'koa-body';
+import { Init, Controller, Jwt, MethodType, Router, StatusCode, ParamsSource } from '../lib/tiny.js';
+import http from 'http';
 import axios from 'axios';
 import { Home } from './confroller.test.js';
 
 const port = 10101;
 const base = 'http://localhost:' + port;
-const app = new Koa();
-const router = new Router({ prefix: '/users' });
-app.use(koaBody());
-router.prefix('/api');
 
 const output = (value) => value;
 
-Tiny.init({
-  controller: { hump: false },
-  jwt: { expiresIn: '4h', jsonwebtoken: jsonwebtoken }
+Init({
+  controller: { prefix: '/api' },
+  jwt: {
+    refuse: function (req, res) {
+      res.writeHead(StatusCode.authError, { 'Content-Type': 'text/plain' });
+      res.end('Auth Limit');
+    },
+    sign: function ([req, res], payload) {
+      // Set Cookie
+      res.setHeader('Set-Cookie', [`token=${JSON.stringify(payload)}; HttpOnly; Secure`]);
+    },
+    verify: function ([req, res]) {
+      let cookies = req.headers.cookie || '';
+      // 解析Cookie字符串（这是一个简单的解析示例，实际中可能需要更复杂的逻辑）
+      const cookieArray = cookies.split('; ');
+      const parsedCookies = {};
+      for (let cookie of cookieArray) {
+        const [name, ...valueParts] = cookie.split('=');
+        const value = valueParts.join('='); // 处理包含'='的cookie值
+        parsedCookies[name.trim()] = decodeURIComponent(value.trim());
+      }
+      if (parsedCookies.token) {
+        return JSON.parse(parsedCookies.token);
+      } else {
+        return null;
+      }
+    }
+  },
+  params: {
+    paramsIn: function ([req, res], source) {
+      return source === ParamsSource.body ? req.body || {} : req.query || {};
+    },
+    paramsInFail: function ([req, res], source) {
+      res.writeHead(StatusCode.paramsError, { 'Content-Type': 'text/plain' });
+      res.end('Params Error');
+    },
+    inject: function ([req, res], params) {
+      req.params = params;
+    }
+  }
 });
 
-Controller.connect(new Home(), router);
+Controller.connect(new Home());
 
-app.use(router.routes());
-app.use(router.allowedMethods());
+// Create HTTP Server
+const server = http.createServer((req, res) => {
+  Router.run(req, res);
+});
 
-const server = app.listen(port);
-
-// console.log(Controller.APIS_JSON);
+server.listen(port, () => {
+  console.log(`Server running at http://127.0.0.1:${port}/`);
+});
 
 const findFuncJson = (module, func) => {
   let result = null;
-  Controller.APIS_JSON.forEach((item) => {
+  Controller.apisJSON.forEach((item) => {
     if (item.module === module && item.func === func) result = item;
   });
   return result;
 };
 
 test('-----Tiny.init-----', () => {
-  expect(output(Controller.options.hump)).toBe(false);
-  expect(output(Jwt.options.expiresIn)).toBe('4h');
-  expect(output(Jwt.options.jsonwebtoken)).toBe(jsonwebtoken);
+  expect(output(Controller.prefix)).toBe('/api');
 });
 
 test('-----Controller.connect-----', () => {
   const func = findFuncJson('home', 'get');
   expect(output(func?.path)).toBe('/api/home/get');
-  expect(output(func?.method)).toBe('get');
+  expect(output(func?.method)).toBe('GET');
   expect(output(func?.requestType)).toBe('application/json');
   expect(output(func?.responseType)).toBe('application/json');
   expect(output(func?.summary)).toBe('Describe');
@@ -89,7 +119,7 @@ test('-----Handler-----', async () => {
 });
 
 test('-----Mapping-----', async () => {
-  const res = await axios.get(base + '/api/home/mapping/1234');
+  const res = await axios.get(base + '/home/mapping/1234');
   expect(output(res.status)).toBe(StatusCode.success);
   expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: '1234' });
 });
@@ -102,6 +132,4 @@ test('-----Summary-----', async () => {
   expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'summary' });
 });
 
-afterAll(() => {
-  server.close();
-});
+afterAll(() => server.close());

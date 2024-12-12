@@ -1,0 +1,8 @@
+import { IncomingMessage } from 'http';
+
+export interface RouterRequest extends IncomingMessage {
+  query?: object | null;
+  params?: object | null;
+  body?: any;
+  file?: any;
+}

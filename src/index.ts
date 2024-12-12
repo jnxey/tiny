@@ -5,13 +5,16 @@ import { Params } from '@/params';
 import { Declare, Model, ModelResult, Required, TypeCheck, StringLength, ArrayCheck, TypeCustom } from '@/model';
 import { InitOptions } from '@/types';
 import { MethodType, DataType, ParamsSource, ParamsType, ModelConfigCache, StatusCode } from '@/values';
+import { Router } from '@/router';
 
-const Tiny = {
-  init: (options: InitOptions): void => {
-    if (options.controller) Controller.init(options.controller);
-    if (options.jwt) Jwt.init(options.jwt);
-    if (options.params) Params.init(options.params);
-  },
+const Init = (options: InitOptions): void => {
+  if (options.controller) Controller.init(options.controller);
+  if (options.jwt) Jwt.init(options.jwt);
+  if (options.params) Params.init(options.params);
+};
+
+export {
+  Init,
   // controller
   Controller,
   Module,
@@ -23,6 +26,8 @@ const Tiny = {
   Handler,
   Mapping,
   Summary,
+  // router
+  Router,
   // jwt
   Jwt,
   Protected,
@@ -47,5 +52,3 @@ const Tiny = {
   ModelConfigCache,
   StatusCode
 };
-
-export default Tiny;

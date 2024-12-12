@@ -58,7 +58,7 @@ export function Protected(): Function {
     const func: Function = descriptor.value;
     descriptor.value = function (): any {
       const args: JwtOptionsArgs = arguments;
-      const payload = Jwt.verify(args);
+      const payload = Jwt.verify.call(this, args);
       if (!!payload) {
         if (Jwt.isResetToken(payload)) Jwt.sign(args, payload);
         return func.call(this, Jwt.inject(args, payload));

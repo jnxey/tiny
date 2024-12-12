@@ -1,9 +1,8 @@
 import { Delete, Dto, Get, Type, Params, ParamsSource, Post, Put, StatusCode, Summary, DataType, Handler, Mapping } from '../lib/tiny.js';
 import { HomeIndexInput } from './model.test.js';
 
-function execHandler(ctx, next) {
-  ctx.body = new Dto({ code: StatusCode.success, result: 'handler', msg: 'success' });
-  next();
+function execHandler(req, res) {
+  Dto.send(res, { code: StatusCode.success, result: 'handler', msg: 'success' });
 }
 
 export class Home {
@@ -12,66 +11,57 @@ export class Home {
   @Get()
   @Type()
   @Summary('Describe')
-  get(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'get', msg: 'success' });
-    next();
+  get(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: 'get', msg: 'success' });
   }
 
   @Post()
   @Type()
-  post(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'post', msg: 'success' });
-    next();
+  post(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: 'post', msg: 'success' });
   }
 
   @Put()
   @Type()
-  put(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'put', msg: 'success' });
-    next();
+  put(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: 'put', msg: 'success' });
   }
 
   @Delete()
   @Type()
-  delete(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'delete', msg: 'success' });
-    next();
+  delete(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: 'delete', msg: 'success' });
   }
 
   @Get()
   @Type(DataType.text, DataType.json)
-  type(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'type', msg: 'success' });
-    next();
+  type(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: 'type', msg: 'success' });
   }
 
   @Get()
   @Type(DataType.text, DataType.json)
   @Handler(execHandler)
-  handler(ctx, next) {
-    next();
-  }
+  handler(req, res) {}
 
   @Get()
   @Type(DataType.text, DataType.json)
   @Mapping('/home/mapping/:test')
-  mapping(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: ctx.params.test, msg: 'success' });
-    next();
+  mapping(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: req.query?.test, msg: 'success' });
   }
 
   @Get()
   @Summary('Summary Test')
-  summary(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'summary', msg: 'success' });
-    next();
+  summary(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: 'summary', msg: 'success' });
   }
 
-  @Post()
-  @Type()
-  @Params(HomeIndexInput, ParamsSource.body)
-  params(ctx, next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' });
-    next();
-  }
+  // @Post()
+  // @Type()
+  // @Params(HomeIndexInput, ParamsSource.body)
+  // params(ctx, next) {
+  //   ctx.body = new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' });
+  //   next();
+  // }
 }
