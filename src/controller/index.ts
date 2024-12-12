@@ -1,7 +1,7 @@
 import { copyAttrToNew, kebabCase } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerRouterFunc } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
-import { FunctionArgs } from '@/types';
+import { ContextAsyncHandler, ContextBase } from '@/context/types';
 
 export class Controller {
   /*
@@ -70,15 +70,14 @@ export class Controller {
       const func = Controller.format ? kebabCase(name) : name;
       const prefix = Controller.prefix;
       const path = handler.MAPPING || prefix + connector + module + connector + func;
-      const middleware = handler.HANDLER;
       if (handler.METHOD === MethodType.get) {
-        Controller.get(path, handler, middleware);
+        Controller.get(path, handler);
       } else if (handler.METHOD === MethodType.delete) {
-        Controller.delete(path, handler, middleware);
+        Controller.delete(path, handler);
       } else if (handler.METHOD === MethodType.post) {
-        Controller.post(path, handler, middleware);
+        Controller.post(path, handler);
       } else if (handler.METHOD === MethodType.put) {
-        Controller.put(path, handler, middleware);
+        Controller.put(path, handler);
       }
       // 以下是接口信息
       Controller.apisJSON.push({
@@ -155,18 +154,11 @@ export function Type(requestType?: DataType, responseType?: DataType): Function 
 /*
  * Router Middleware
  */
-export function Handler<P1, P2 extends Function>(handler: () => Promise<P1>, error: P2): Function {
+export function Middleware<P1, P2 extends Function>(handler: ContextAsyncHandler): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
     const next: Function = descriptor.value;
-    descriptor.value = function (...args: FunctionArgs) {
-      handler
-        .apply(this, args)
-        .then(() => {
-          next.apply(this, arguments);
-        })
-        .catch(() => {
-          if (error) error.apply(this, arguments);
-        });
+    descriptor.value = function (context: ContextBase) {
+      handler.call(this, context, next.bind(this));
     };
     copyAttrToNew(descriptor.value, next);
   };

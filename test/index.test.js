@@ -1,68 +1,26 @@
-import { Init, Controller, Router, StatusCode, ParamsSource, MethodType } from '../lib/tiny.js';
-import http from 'http';
+import Tiny, { Controller, StatusCode } from '../lib/tiny.js';
 import axios from 'axios';
 import { Home } from './confroller.test.js';
-import { bodyHandler, getCookie } from './tool.test.js';
+import { bodyHandler } from './tool.test.js';
+import { initTiny } from './init.test.js';
 
 const port = 10101;
 const base = 'http://localhost:' + port;
 
+// Create HTTP Server
+const server = new Tiny(
+  async (context, next) => {
+    await bodyHandler(context);
+    next(context);
+  },
+  (context) => {}
+);
+
+initTiny();
+
 const output = (value) => value;
 
-Init({
-  controller: {
-    prefix: '/api',
-    get: Router.getRouteController(MethodType.get),
-    post: Router.getRouteController(MethodType.post),
-    delete: Router.getRouteController(MethodType.delete),
-    put: Router.getRouteController(MethodType.put)
-  },
-  jwt: {
-    refuse: function ([req, res]) {
-      res.writeHead(StatusCode.authError, { 'Content-Type': 'text/plain' });
-      res.end('Auth Limit');
-    },
-    sign: function ([req, res], payload) {
-      // Set Cookie
-      res.setHeader('Set-Cookie', [`token=${JSON.stringify(payload)}; HttpOnly; Secure`]);
-      return Promise.resolve(JSON.stringify(payload));
-    },
-    verify: function ([req, _]) {
-      const parsedCookies = getCookie(req);
-      if (parsedCookies.token) {
-        return Promise.resolve(JSON.parse(parsedCookies.token));
-      } else {
-        return Promise.resolve(null);
-      }
-    },
-    inject: function ([req, res], payload) {
-      req.payload = payload;
-      return [req, res];
-    }
-  },
-  params: {
-    paramsIn: function ([req, res], source) {
-      return source === ParamsSource.body ? req.body || {} : req.query || {};
-    },
-    paramsInFail: function ([req, res]) {
-      res.writeHead(StatusCode.paramsError, { 'Content-Type': 'text/plain' });
-      res.end('Params Error');
-    },
-    inject: function ([req, res], params) {
-      req.params = params;
-      return [req, res];
-    }
-  }
-});
-
 Controller.connect(new Home());
-
-// Create HTTP Server
-const server = http.createServer((req, res) => {
-  bodyHandler(req, res, () => {
-    Router.run(req, res);
-  });
-});
 
 server.listen(port, () => {
   console.log(`Server running at http://127.0.0.1:${port}/`);
@@ -121,10 +79,10 @@ test('-----Type-----', () => {
   expect(output(func?.responseType)).toBe('application/json');
 });
 
-test('-----Handler-----', async () => {
-  const res = await axios.get(base + '/api/home/handler');
+test('-----Middleware-----', async () => {
+  const res = await axios.get(base + '/api/home/middleware');
   expect(output(res.status)).toBe(StatusCode.success);
-  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'handler' });
+  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'middleware' });
 });
 
 test('-----Mapping-----', async () => {

@@ -1,53 +1,37 @@
-import { ParamsSource } from '@/values';
+import { ParamsSource, StatusCode } from '@/values';
 import { copyAttrToNew } from '@/tools';
 import { Model, ModelResult } from '@/model';
-import { ParamsOptions, ParamsOptionsInject, ParamsOptionsParamsIn, ParamsOptionsParamsInFail } from '@/params/types';
-import { FunctionArgs } from '@/types';
+import { ContextBase } from '@/context/types';
+import { Dto } from '@/dto';
 
 /*
  * Router parameter
  */
 export class Params {
   /*
-   * Retrieve the entered parameters
+   * Params in refuse
    */
-  public static paramsIn: ParamsOptionsParamsIn = () => null;
-
-  /*
-   * Dealing with parameter validation failures
-   */
-  public static paramsInFail: ParamsOptionsParamsInFail = () => null;
-
-  /*
-   * Inject the correct parameters
-   */
-  public static inject: ParamsOptionsInject = (args) => args;
-
-  /*
-   * Initialize Params configuration
-   */
-  public static init(options: ParamsOptions) {
-    if (options.paramsIn) Params.paramsIn = options.paramsIn;
-    if (options.paramsInFail) Params.paramsInFail = options.paramsInFail;
-    if (options.inject) Params.inject = options.inject;
-  }
+  static refuse = (context: ContextBase, message: string) => {
+    context.finish(StatusCode.success, new Dto({ code: StatusCode.paramsError, msg: message, result: null }));
+  };
 
   /*
    * Params.in Decorator: Intercept and process incoming parameters of the request
    */
-  public static in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1>(p1: P1) => T) {
+  public static in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, filter?: <P1>(p1: P1) => T) {
     return function (_, __, descriptor: PropertyDescriptor) {
       const next: Function = descriptor.value;
       const _params = new params();
       descriptor.value.PARAMS_MODEL = _params.getConfigCache();
       if (!validate) return;
-      descriptor.value = function (...args: FunctionArgs) {
-        const params = Params.paramsIn(args, type);
-        const result: ModelResult = _params.fill(!!handler ? handler(params) : params);
+      descriptor.value = function (context: ContextBase) {
+        const params = type === ParamsSource.body ? context.body : context.query;
+        const result: ModelResult = _params.fill(!!filter ? filter(params) : params);
         if (result.valid) {
-          return next.apply(this, Params.inject(args, params));
+          context.setParams(_params);
+          return next.call(this, context);
         } else {
-          return Params.paramsInFail.call(this, args);
+          return Params.refuse(context, result.message);
         }
       };
       copyAttrToNew(descriptor.value, next);

@@ -1,6 +1,7 @@
 import { DataType, MethodType } from '@/values';
+import { ContextBase } from '@/context/types';
 
-export type ControllerRouterFunc = (path: string, handler: Function, middleware?: Function) => void;
+export type ControllerRouterFunc = (path: string, handler: Function) => void;
 
 export type ControllerOptions = {
   prefix?: string;

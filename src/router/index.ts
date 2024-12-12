@@ -1,9 +1,8 @@
-import { ServerResponse } from 'http';
 import { MethodType } from '@/values';
 import { isObject, parseRoute } from '@/tools';
-import { RouterRequest } from '@/router/types';
 import { ControllerRouterFunc } from '@/controller/types';
 import url from 'url';
+import { ContextAsyncHandler, ContextBase } from '@/context/types';
 
 const SymbolParam = ':';
 type RouteItem = { path: string; method: MethodType; handler: Function };
@@ -32,34 +31,33 @@ export class Router {
   /*
    * Trigger 404
    */
-  static notFound = (_, res: ServerResponse) => {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('404 Not Found');
+  static notFound = (context: ContextBase) => {
+    context.res.writeHead(404, { 'Content-Type': 'text/plain' });
+    context.res.end('404 Not Found');
   };
 
   /*
    * Server run
    */
-  static run = (req: RouterRequest, res: ServerResponse) => {
-    const parsedUrl = url.parse(req.url ?? '', true);
-    const routes = Router.getRoutes(req.method);
+  static run = (context: ContextBase) => {
+    const parsedUrl = url.parse(context.req.url ?? '', true);
+    const routes = Router.getRoutes(context.req.method);
     const pathname = parsedUrl.pathname ?? '';
     const route = routes[pathname];
-    req.query = parsedUrl.query;
+    const query = parsedUrl.query || {};
     if (!!route) {
-      return route.handler(req, res);
+      context.setQuery(query);
+      return route.handler(context);
     } else {
       for (let i = 0; i < routes.REG.length; i++) {
         const _route = routes.REG[i];
         const params = parseRoute(pathname, _route.path);
         if (isObject(params)) {
-          req.query = { ...parsedUrl.query, ...params };
-          return _route.handler(req, res);
+          context.setQuery({ ...query, ...params });
+          return _route.handler(context);
         }
       }
-
-      Object.keys(routes.REG).forEach((path) => {});
-      return Router.notFound(req, res);
+      return Router.notFound(context);
     }
   };
 
@@ -78,11 +76,8 @@ export class Router {
    * Get default Controller Route
    */
   static getRouteController = (method: MethodType): ControllerRouterFunc => {
-    return (path: string, handler: Function, middleware?: Function) => {
-      Router.register(path, method, (req, res) => {
-        if (middleware) middleware(req, res);
-        handler(req, res);
-      });
+    return (path: string, handler: Function) => {
+      Router.register(path, method, handler);
     };
   };
 }

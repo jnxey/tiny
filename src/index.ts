@@ -1,20 +1,44 @@
-import { Controller, Module, Delete, Get, Post, Put, Type, Handler, Mapping, Summary } from '@/controller';
+import { Controller, Delete, Get, Mapping, Middleware, Module, Post, Put, Summary, Type } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Dto } from '@/dto';
 import { Params } from '@/params';
-import { Declare, Model, ModelResult, Required, TypeCheck, StringLength, ArrayCheck, TypeCustom } from '@/model';
-import { InitOptions } from '@/types';
-import { MethodType, DataType, ParamsSource, ParamsType, ModelConfigCache, StatusCode } from '@/values';
+import { ArrayCheck, Declare, Model, ModelResult, Required, StringLength, TypeCheck, TypeCustom } from '@/model';
+import { DataType, MethodType, ModelConfigCache, ParamsSource, ParamsType, StatusCode } from '@/values';
 import { Router } from '@/router';
+import { Context } from '@/context';
+import http from 'http';
+import { ContextAsyncHandler, ContextBase } from '@/context/types';
 
-const Init = (options: InitOptions): void => {
-  if (options.controller) Controller.init(options.controller);
-  if (options.jwt) Jwt.init(options.jwt);
-  if (options.params) Params.init(options.params);
-};
+export default class Tiny {
+  constructor(beforeEach?: ContextAsyncHandler, afterEach?: (context: ContextBase) => any) {
+    Controller.init({
+      get: Router.getRouteController(MethodType.get),
+      post: Router.getRouteController(MethodType.post),
+      delete: Router.getRouteController(MethodType.delete),
+      put: Router.getRouteController(MethodType.put)
+    });
+
+    // Create HTTP Server
+    return http.createServer(async (req, res) => {
+      const context = new Context(req, res);
+      const next = Router.run;
+      if (beforeEach) {
+        beforeEach(context, next);
+      } else {
+        next(context);
+      }
+      if (afterEach) {
+        context.addListenFinish(() => {
+          afterEach(context);
+        });
+      }
+    });
+  }
+}
 
 export {
-  Init,
+  // context
+  Context,
   // controller
   Controller,
   Module,
@@ -23,7 +47,7 @@ export {
   Post,
   Put,
   Type,
-  Handler,
+  Middleware,
   Mapping,
   Summary,
   // router
