@@ -1,9 +1,6 @@
 import { kebabCase } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerRouterFunc } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
-import { Router } from '@/router';
-import { RouterRequest } from '@/router/types';
-import { ServerResponse } from 'http';
 
 export class Controller {
   /*
@@ -19,42 +16,22 @@ export class Controller {
   /*
    * Get Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static get: ControllerRouterFunc = (path, handler, middleware) => {
-    Router.register(path, MethodType.get, (req: RouterRequest, res: ServerResponse) => {
-      if (middleware) middleware(req, res);
-      handler(req, res);
-    });
-  };
+  public static get: ControllerRouterFunc = () => {};
 
   /*
    * Post Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static post: ControllerRouterFunc = (path, handler, middleware) => {
-    Router.register(path, MethodType.post, (req: RouterRequest, res: ServerResponse) => {
-      if (middleware) middleware(req, res);
-      handler(req, res);
-    });
-  };
+  public static post: ControllerRouterFunc = () => {};
 
   /*
    * Delete Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static delete: ControllerRouterFunc = (path, handler, middleware) => {
-    Router.register(path, MethodType.delete, (req: RouterRequest, res: ServerResponse) => {
-      if (middleware) middleware(req, res);
-      handler(req, res);
-    });
-  };
+  public static delete: ControllerRouterFunc = () => {};
 
   /*
    * Put Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static put: ControllerRouterFunc = (path, handler, middleware) => {
-    Router.register(path, MethodType.put, (req: RouterRequest, res: ServerResponse) => {
-      if (middleware) middleware(req, res);
-      handler(req, res);
-    });
-  };
+  public static put: ControllerRouterFunc = () => {};
 
   /*
    * Apis JSON
@@ -69,6 +46,7 @@ export class Controller {
     if (options.format) Controller.format = options.format;
     if (options.get) Controller.get = options.get;
     if (options.post) Controller.post = options.post;
+    if (options.delete) Controller.delete = options.delete;
     if (options.put) Controller.put = options.put;
   }
 

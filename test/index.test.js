@@ -1,7 +1,8 @@
-import { Init, Controller, Router, StatusCode, ParamsSource } from '../lib/tiny.js';
+import { Init, Controller, Router, StatusCode, ParamsSource, MethodType } from '../lib/tiny.js';
 import http from 'http';
 import axios from 'axios';
 import { Home } from './confroller.test.js';
+import { bodyHandler, getCookie } from './tool.test.js';
 
 const port = 10101;
 const base = 'http://localhost:' + port;
@@ -9,7 +10,13 @@ const base = 'http://localhost:' + port;
 const output = (value) => value;
 
 Init({
-  controller: { prefix: '/api' },
+  controller: {
+    prefix: '/api',
+    get: Router.getRouteController(MethodType.get),
+    post: Router.getRouteController(MethodType.post),
+    delete: Router.getRouteController(MethodType.delete),
+    put: Router.getRouteController(MethodType.put)
+  },
   jwt: {
     refuse: function ([req, res]) {
       res.writeHead(StatusCode.authError, { 'Content-Type': 'text/plain' });
@@ -20,15 +27,7 @@ Init({
       res.setHeader('Set-Cookie', [`token=${JSON.stringify(payload)}; HttpOnly; Secure`]);
     },
     verify: function ([req, _]) {
-      let cookies = req.headers.cookie || '';
-      // 解析Cookie字符串（这是一个简单的解析示例，实际中可能需要更复杂的逻辑）
-      const cookieArray = cookies.split('; ');
-      const parsedCookies = {};
-      for (let cookie of cookieArray) {
-        const [name, ...valueParts] = cookie.split('=');
-        const value = valueParts.join('='); // 处理包含'='的cookie值
-        parsedCookies[name.trim()] = decodeURIComponent(value.trim());
-      }
+      const parsedCookies = getCookie(req);
       if (parsedCookies.token) {
         return JSON.parse(parsedCookies.token);
       } else {
@@ -59,12 +58,16 @@ Controller.connect(new Home());
 
 // Create HTTP Server
 const server = http.createServer((req, res) => {
-  Router.run(req, res, Router.body);
+  bodyHandler(req, res, () => {
+    Router.run(req, res);
+  });
 });
 
 server.listen(port, () => {
   console.log(`Server running at http://127.0.0.1:${port}/`);
 });
+
+// console.log(Controller.apisJSON, '---------1');
 
 const findFuncJson = (module, func) => {
   let result = null;

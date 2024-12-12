@@ -1,8 +1,9 @@
 import { ServerResponse } from 'http';
-import { DataType, MethodType } from '@/values';
-import { getJSON, isFunction, isObject, parseRoute } from '@/tools';
+import { MethodType } from '@/values';
+import { isObject, parseRoute } from '@/tools';
 import { RouterRequest } from '@/router/types';
-import querystring from 'querystring';
+import { ControllerRouterFunc } from '@/controller/types';
+import url from 'url';
 
 const SymbolParam = ':';
 type RouteItem = { path: string; method: MethodType; handler: Function };
@@ -15,8 +16,6 @@ export class Router {
    * Route list
    */
   static Routes: RoutesList = {
-    HEAD: { REG: [] },
-    OPTIONS: { REG: [] },
     GET: { REG: [] },
     POST: { REG: [] },
     PUT: { REG: [] },
@@ -39,55 +38,22 @@ export class Router {
   };
 
   /*
-   * Handler body
-   */
-  static otherBody = (req: RouterRequest, _) => {
-    // ToDo
-  };
-
-  /*
-   * Handler body
-   */
-  static body = (req: RouterRequest, _) => {
-    const contentType = req.headers['content-type'];
-    let body = '';
-    // Monitor data block reception events
-    req.on('data', (chunk) => {
-      body += chunk.toString(); // Convert the received data block into a string and accumulate it
-    });
-
-    // End of listening request event
-    req.on('end', () => {
-      if (contentType === DataType.json) {
-        req.body = getJSON(body);
-      } else if (contentType === DataType.text || contentType === DataType.html || contentType === DataType.xml) {
-        req.body = body;
-      } else if (contentType === DataType.formUrlencoded) {
-        req.body = querystring.parse(body);
-      }
-    });
-
-    Router.otherBody(req, _);
-  };
-
-  /*
    * Server run
    */
-  static run = (req: RouterRequest, res: ServerResponse, bodyHandler?: Function) => {
-    if (!!bodyHandler) bodyHandler(req, res);
-    const host = 'http://127.0.0.1';
-    const url = new URL(req.url || '', host);
+  static run = (req: RouterRequest, res: ServerResponse) => {
+    const parsedUrl = url.parse(req.url ?? '', true);
     const routes = Router.getRoutes(req.method);
-    const route = routes[url.pathname];
-    req.query = url.searchParams;
+    const pathname = parsedUrl.pathname ?? '';
+    const route = routes[pathname];
+    req.query = parsedUrl.query;
     if (!!route) {
       return route.handler(req, res);
     } else {
       for (let i = 0; i < routes.REG.length; i++) {
         const _route = routes.REG[i];
-        const params = parseRoute(url.pathname, _route.path);
+        const params = parseRoute(pathname, _route.path);
         if (isObject(params)) {
-          req.query = { ...req.query, ...params };
+          req.query = { ...parsedUrl.query, ...params };
           return _route.handler(req, res);
         }
       }
@@ -106,5 +72,17 @@ export class Router {
     } else {
       Router.Routes[method][path] = { path, method, handler };
     }
+  };
+
+  /*
+   * Get default Controller Route
+   */
+  static getRouteController = (method: MethodType): ControllerRouterFunc => {
+    return (path: string, handler: Function, middleware?: Function) => {
+      Router.register(path, method, (req, res) => {
+        if (middleware) middleware(req, res);
+        handler(req, res);
+      });
+    };
   };
 }
