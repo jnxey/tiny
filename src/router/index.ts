@@ -38,7 +38,17 @@ export class Router {
     res.end('404 Not Found');
   };
 
-  static body = (req: RouterRequest, res: ServerResponse) => {
+  /*
+   * Handler body
+   */
+  static otherBody = (req: RouterRequest, _) => {
+    // ToDo
+  };
+
+  /*
+   * Handler body
+   */
+  static body = (req: RouterRequest, _) => {
     const contentType = req.headers['content-type'];
     let body = '';
     // Monitor data block reception events
@@ -57,16 +67,14 @@ export class Router {
       }
     });
 
-    if (contentType === DataType.formData && req.method === MethodType.post) {
-      // ToDo
-    }
+    Router.otherBody(req, _);
   };
 
   /*
    * Server run
    */
-  static run = (req: RouterRequest, res: ServerResponse, bodyHandler) => {
-    if (isFunction(bodyHandler)) bodyHandler(req, res);
+  static run = (req: RouterRequest, res: ServerResponse, bodyHandler?: Function) => {
+    if (!!bodyHandler) bodyHandler(req, res);
     const host = 'http://127.0.0.1';
     const url = new URL(req.url || '', host);
     const routes = Router.getRoutes(req.method);

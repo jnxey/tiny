@@ -57,11 +57,10 @@ export class Home {
     Dto.send(res, { code: StatusCode.success, result: 'summary', msg: 'success' });
   }
 
-  // @Post()
-  // @Type()
-  // @Params(HomeIndexInput, ParamsSource.body)
-  // params(ctx, next) {
-  //   ctx.body = new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' });
-  //   next();
-  // }
+  @Post()
+  @Type()
+  @Params.in(HomeIndexInput, ParamsSource.body)
+  params(req, res) {
+    Dto.send(res, { code: StatusCode.success, result: req.params, msg: 'success' });
+  }
 }

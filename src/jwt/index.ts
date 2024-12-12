@@ -61,7 +61,7 @@ export function Protected(): Function {
       const payload = Jwt.verify.call(this, args);
       if (!!payload) {
         if (Jwt.isResetToken(payload)) Jwt.sign(args, payload);
-        return func.call(this, Jwt.inject(args, payload));
+        return func.apply(this, Jwt.inject(args, payload));
       } else {
         return Jwt.refuse.call(this, args);
       }

@@ -45,7 +45,7 @@ export class Params {
         const params = Params.paramsIn(args, type);
         const result: ModelResult = _params.fill(!!handler ? handler(params) : params);
         if (result.valid) {
-          return func.call(this, Params.inject(args, params));
+          return func.apply(this, Params.inject(args, params));
         } else {
           return Params.paramsInFail.call(this, args);
         }

@@ -1,4 +1,4 @@
-import { Init, Controller, Jwt, MethodType, Router, StatusCode, ParamsSource } from '../lib/tiny.js';
+import { Init, Controller, Router, StatusCode, ParamsSource } from '../lib/tiny.js';
 import http from 'http';
 import axios from 'axios';
 import { Home } from './confroller.test.js';
@@ -11,7 +11,7 @@ const output = (value) => value;
 Init({
   controller: { prefix: '/api' },
   jwt: {
-    refuse: function (req, res) {
+    refuse: function ([req, res]) {
       res.writeHead(StatusCode.authError, { 'Content-Type': 'text/plain' });
       res.end('Auth Limit');
     },
@@ -19,7 +19,7 @@ Init({
       // Set Cookie
       res.setHeader('Set-Cookie', [`token=${JSON.stringify(payload)}; HttpOnly; Secure`]);
     },
-    verify: function ([req, res]) {
+    verify: function ([req, _]) {
       let cookies = req.headers.cookie || '';
       // 解析Cookie字符串（这是一个简单的解析示例，实际中可能需要更复杂的逻辑）
       const cookieArray = cookies.split('; ');
@@ -34,18 +34,23 @@ Init({
       } else {
         return null;
       }
+    },
+    inject: function ([req, res], payload) {
+      req.payload = payload;
+      return [req, res];
     }
   },
   params: {
     paramsIn: function ([req, res], source) {
       return source === ParamsSource.body ? req.body || {} : req.query || {};
     },
-    paramsInFail: function ([req, res], source) {
+    paramsInFail: function ([req, res]) {
       res.writeHead(StatusCode.paramsError, { 'Content-Type': 'text/plain' });
       res.end('Params Error');
     },
     inject: function ([req, res], params) {
       req.params = params;
+      return [req, res];
     }
   }
 });
@@ -54,7 +59,7 @@ Controller.connect(new Home());
 
 // Create HTTP Server
 const server = http.createServer((req, res) => {
-  Router.run(req, res);
+  Router.run(req, res, Router.body);
 });
 
 server.listen(port, () => {
@@ -130,6 +135,12 @@ test('-----Summary-----', async () => {
   const res = await axios.get(base + '/api/home/summary');
   expect(output(res.status)).toBe(StatusCode.success);
   expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'summary' });
+});
+
+test('-----Params-----', async () => {
+  const res = await axios.post(base + '/api/home/params', { data: { name: 'test' } });
+  expect(output(res.status)).toBe(StatusCode.success);
+  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: { name: 'test' } });
 });
 
 afterAll(() => server.close());
