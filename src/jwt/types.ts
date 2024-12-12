@@ -1,12 +1,12 @@
-export type JwtOptionsArgs = any[] | IArguments;
+import { FunctionArgs } from '@/types';
 
-export type JwtOptionsSign = <Payload, Token = string>(args: JwtOptionsArgs, payload: Payload) => Token | null;
+export type JwtOptionsSign = <Payload, Token>(args: FunctionArgs, payload: Payload) => Promise<Token | null>;
 
-export type JwtOptionsVerify = <VerifyResult>(args: JwtOptionsArgs) => VerifyResult | null;
+export type JwtOptionsVerify = <Payload>(args: []) => Promise<Payload | null>;
 
-export type JwtOptionsInject = <Payload>(args: JwtOptionsArgs, payload: Payload) => JwtOptionsArgs;
+export type JwtOptionsInject = <Payload>(args: FunctionArgs, payload: Payload) => FunctionArgs;
 
-export type JwtOptionsRefuse = <RefuseResult>(args: JwtOptionsArgs) => RefuseResult | null;
+export type JwtOptionsRefuse = <RefuseResult>(args: FunctionArgs) => RefuseResult | null;
 
 export type JwtOptionsIsResetToken = <Payload>(payload: Payload) => boolean;
 

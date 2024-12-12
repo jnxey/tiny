@@ -8,6 +8,7 @@ function send(res, params) {
 
 function execHandler(req, res) {
   send(res, { code: StatusCode.success, result: 'handler', msg: 'success' });
+  return Promise.reject();
 }
 
 export class Home {

@@ -1,6 +1,7 @@
-import { kebabCase } from '@/tools';
+import { copyAttrToNew, kebabCase } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerRouterFunc } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
+import { FunctionArgs } from '@/types';
 
 export class Controller {
   /*
@@ -154,9 +155,20 @@ export function Type(requestType?: DataType, responseType?: DataType): Function 
 /*
  * Router Middleware
  */
-export function Handler(handler?: Function): Function {
+export function Handler<P1, P2 extends Function>(handler: () => Promise<P1>, error: P2): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
-    descriptor.value.HANDLER = handler;
+    const next: Function = descriptor.value;
+    descriptor.value = function (...args: FunctionArgs) {
+      handler
+        .apply(this, args)
+        .then(() => {
+          next.apply(this, arguments);
+        })
+        .catch(() => {
+          if (error) error.apply(this, arguments);
+        });
+    };
+    copyAttrToNew(descriptor.value, next);
   };
 }
 

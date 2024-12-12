@@ -25,13 +25,14 @@ Init({
     sign: function ([req, res], payload) {
       // Set Cookie
       res.setHeader('Set-Cookie', [`token=${JSON.stringify(payload)}; HttpOnly; Secure`]);
+      return Promise.resolve(JSON.stringify(payload));
     },
     verify: function ([req, _]) {
       const parsedCookies = getCookie(req);
       if (parsedCookies.token) {
-        return JSON.parse(parsedCookies.token);
+        return Promise.resolve(JSON.parse(parsedCookies.token));
       } else {
-        return null;
+        return Promise.resolve(null);
       }
     },
     inject: function ([req, res], payload) {
@@ -140,10 +141,58 @@ test('-----Summary-----', async () => {
   expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'summary' });
 });
 
-test('-----Params-----', async () => {
-  const res = await axios.post(base + '/api/home/params', { data: { name: 'test' } });
+test('-----Params-1-----', async () => {
+  const data = { id: 1, name: 'test', list: ['12', '23'] };
+  const res = await axios.post(base + '/api/home/params', { data: data });
   expect(output(res.status)).toBe(StatusCode.success);
-  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: { name: 'test' } });
+  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: data });
+});
+
+test('-----Params-2-----', () => {
+  const data = { id: 1, name: 'test', list: ['12', '23'] };
+  try {
+    axios
+      .post(base + '/api/home/params', { data: { data, list: [1, 2, 3] } })
+      .then((res) => {
+        expect(output(res.status)).toBe(StatusCode.paramsError);
+      })
+      .catch((e) => {});
+  } catch (e) {}
+});
+
+test('-----Params-3-----', () => {
+  const data = { id: 1, name: 'test', list: ['12', '23'] };
+  try {
+    axios
+      .post(base + '/api/home/params', { data: { data, id: '1' } })
+      .then((res) => {
+        expect(output(res.status)).toBe(StatusCode.paramsError);
+      })
+      .catch((e) => {});
+  } catch (e) {}
+});
+
+test('-----Params-4-----', () => {
+  const data = { id: 1, name: 'test', list: ['12', '23'] };
+  try {
+    axios
+      .post(base + '/api/home/params', { data: { data, name: 1 } })
+      .then((res) => {
+        expect(output(res.status)).toBe(StatusCode.paramsError);
+      })
+      .catch((e) => {});
+  } catch (e) {}
+});
+
+test('-----Router-----', () => {
+  try {
+    axios
+      .get(base + '/api/home/not-found')
+      .then((res) => {
+        expect(output(res.status)).toBe(StatusCode.paramsError);
+      })
+      .catch((e) => {});
+  } catch (e) {}
 });
 
 afterAll(() => server.close());

@@ -49,7 +49,7 @@ export enum ParamsType {
 export const StatusCode = {
   success: 200,
   paramsError: 400,
-  authError: 408,
+  authError: 401,
   serveError: 500
 };
 

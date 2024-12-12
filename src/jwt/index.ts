@@ -1,13 +1,6 @@
 import { copyAttrToNew } from '@/tools';
-import {
-  JwtOptions,
-  JwtOptionsArgs,
-  JwtOptionsInject,
-  JwtOptionsIsResetToken,
-  JwtOptionsRefuse,
-  JwtOptionsSign,
-  JwtOptionsVerify
-} from '@/jwt/types';
+import { JwtOptions, JwtOptionsInject, JwtOptionsIsResetToken, JwtOptionsRefuse, JwtOptionsSign, JwtOptionsVerify } from '@/jwt/types';
+import { FunctionArgs } from '@/types';
 
 /*
  * Jwt constructor
@@ -16,12 +9,12 @@ export class Jwt {
   /*
    * Perform JWT signature
    */
-  public static sign: JwtOptionsSign = () => null;
+  public static sign: JwtOptionsSign = () => Promise.resolve(null);
 
   /*
    * Perform JWT verification
    */
-  public static verify: JwtOptionsVerify = () => null;
+  public static verify: JwtOptionsVerify = () => Promise.resolve(null);
 
   /*
    * Inject payload and receive an array for handler input
@@ -55,17 +48,21 @@ export class Jwt {
  */
 export function Protected(): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
-    const func: Function = descriptor.value;
-    descriptor.value = function (): any {
-      const args: JwtOptionsArgs = arguments;
-      const payload = Jwt.verify.call(this, args);
-      if (!!payload) {
-        if (Jwt.isResetToken(payload)) Jwt.sign(args, payload);
-        return func.apply(this, Jwt.inject(args, payload));
-      } else {
-        return Jwt.refuse.call(this, args);
-      }
+    const next: Function = descriptor.value;
+    descriptor.value = function (...args: FunctionArgs) {
+      Jwt.verify.apply(this, args).then((payload) => {
+        if (!!payload) {
+          const _args = next.apply(this, Jwt.inject(args, payload));
+          if (Jwt.isResetToken(payload)) {
+            Jwt.sign(args, payload).then(() => next.apply(this, _args));
+          } else {
+            next.apply(this, _args);
+          }
+        } else {
+          Jwt.refuse.apply(this, args);
+        }
+      });
     };
-    copyAttrToNew(descriptor.value, func);
+    copyAttrToNew(descriptor.value, next);
   };
 }

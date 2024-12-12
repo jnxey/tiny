@@ -1,12 +1,11 @@
 import { ParamsSource } from '@/values';
+import { FunctionArgs } from '@/types';
 
-export type ParamsOptionsArgs = any[] | IArguments;
+export type ParamsOptionsParamsIn = <P1>(args: FunctionArgs, source: ParamsSource) => P1 | null;
 
-export type ParamsOptionsParamsIn = <P1>(args: ParamsOptionsArgs, source: ParamsSource) => P1 | null;
+export type ParamsOptionsParamsInFail = <RefuseResult>(args: FunctionArgs) => RefuseResult | null;
 
-export type ParamsOptionsParamsInFail = <RefuseResult>(args: ParamsOptionsArgs) => RefuseResult | null;
-
-export type ParamsOptionsInject = <P1>(args: ParamsOptionsArgs, params: P1) => ParamsOptionsArgs;
+export type ParamsOptionsInject = <P1>(args: FunctionArgs, params: P1) => FunctionArgs;
 
 export type ParamsOptions = {
   paramsIn?: ParamsOptionsParamsIn;

@@ -1,7 +1,8 @@
 import { ParamsSource } from '@/values';
 import { copyAttrToNew } from '@/tools';
 import { Model, ModelResult } from '@/model';
-import { ParamsOptions, ParamsOptionsArgs, ParamsOptionsInject, ParamsOptionsParamsIn, ParamsOptionsParamsInFail } from '@/params/types';
+import { ParamsOptions, ParamsOptionsInject, ParamsOptionsParamsIn, ParamsOptionsParamsInFail } from '@/params/types';
+import { FunctionArgs } from '@/types';
 
 /*
  * Router parameter
@@ -36,21 +37,20 @@ export class Params {
    */
   public static in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1>(p1: P1) => T) {
     return function (_, __, descriptor: PropertyDescriptor) {
-      const func: Function = descriptor.value;
+      const next: Function = descriptor.value;
       const _params = new params();
       descriptor.value.PARAMS_MODEL = _params.getConfigCache();
       if (!validate) return;
-      descriptor.value = function () {
-        const args: ParamsOptionsArgs = arguments;
+      descriptor.value = function (...args: FunctionArgs) {
         const params = Params.paramsIn(args, type);
         const result: ModelResult = _params.fill(!!handler ? handler(params) : params);
         if (result.valid) {
-          return func.apply(this, Params.inject(args, params));
+          return next.apply(this, Params.inject(args, params));
         } else {
           return Params.paramsInFail.call(this, args);
         }
       };
-      copyAttrToNew(descriptor.value, func);
+      copyAttrToNew(descriptor.value, next);
     };
   }
 
