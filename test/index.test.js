@@ -14,6 +14,10 @@ tiny.begin = async (context, next) => {
   next();
 };
 
+tiny.onerror = (err) => {
+  console.log(err, '---------------------onerror');
+};
+
 initTiny();
 
 const output = (value) => value;

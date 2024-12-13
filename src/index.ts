@@ -8,27 +8,48 @@ import { Router } from '@/router';
 import { Context } from '@/context';
 import http from 'http';
 import { ContextAsyncHandler, ContextBase } from '@/context/types';
-import { FunctionArgs } from '@/types';
+import { FunctionArgs, FunctionError } from '@/types';
 import { Server } from 'net';
 
 export default class Tiny {
   constructor() {}
 
+  /*
+   * Execute before entering the controller after requesting entry
+   */
   public begin?: ContextAsyncHandler;
+
+  /*
+   * Execute after the request is completed, i.e. execute after res triggers pre finish
+   */
   public finish?: (context: ContextBase) => any;
 
+  /*
+   * Internal error in monitoring controller
+   */
+  public onerror?: (err: FunctionError) => any = () => {};
+
+  /*
+   * Create service port
+   */
   public listen(...args: FunctionArgs): Server {
     const server = http.createServer(async (req, res) => {
-      const context = new Context(req, res);
-      const next = Router.run.bind(this, context);
-      if (this.begin) {
-        this.begin(context, next);
-      } else {
-        next();
+      try {
+        const context = new Context(req, res);
+        const next = Router.run.bind(this, context);
+        if (this.begin) {
+          this.begin(context, next);
+        } else {
+          next();
+        }
+        context.res.on('prefinish', () => {
+          if (this.finish) this.finish(context);
+        });
+      } catch (e: FunctionError) {
+        res.statusCode = 500;
+        res.end('Internal Server Error');
+        if (this.onerror) this.onerror(e);
       }
-      context.res.on('finish', () => {
-        if (this.finish) this.finish(context);
-      });
     });
     return server.listen(...args);
   }

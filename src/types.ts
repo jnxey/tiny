@@ -3,3 +3,5 @@ export type Constructor<T = any> = {
 };
 
 export type FunctionArgs = any;
+
+export type FunctionError = Error | unknown;
