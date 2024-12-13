@@ -22,7 +22,7 @@ export class Jwt {
    * Perform JWT verification refuse
    */
   static refuse = (context: ContextBase) => {
-    context.finish(StatusCode.success, new Dto({ code: StatusCode.authError, msg: 'No permission to access temporarily', result: null }));
+    context.send(StatusCode.success, new Dto({ code: StatusCode.authError, msg: 'No permission to access temporarily', result: null }));
   };
 
   /*

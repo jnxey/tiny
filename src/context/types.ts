@@ -24,9 +24,8 @@ export interface ContextBase {
   payload: ContextPayload;
   body: ContextBody;
   files: ContextFiles;
-  finishCallback: Function[];
 
-  finish(code: number, data: Dto): void;
+  send(code: number, data: Dto): void;
 
   setQuery(query: ContextQuery): void;
 

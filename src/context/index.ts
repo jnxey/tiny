@@ -12,25 +12,15 @@ export class Context implements ContextBase {
   public body: ContextBody;
   public files: ContextFiles;
   public extend: ContextExtend = {};
-  public finishCallback: Function[] = [];
 
   constructor(req: IncomingMessage, res: ServerResponse) {
     this.req = req;
     this.res = res;
   }
 
-  finish(code: number, data: Dto) {
+  send(code: number, data: Dto) {
     this.res.writeHead(code, { 'Content-Type': DataType.json });
     this.res.end(JSON.stringify(data));
-  }
-
-  addListenFinish(fn: Function) {
-    this.finishCallback.push(fn);
-  }
-
-  removeListenFinish(fn: Function) {
-    const key = this.finishCallback.indexOf(fn);
-    if (key > -1) this.finishCallback.splice(key, 1);
   }
 
   setQuery(query: ContextQuery) {
