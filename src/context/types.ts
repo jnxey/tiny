@@ -14,7 +14,7 @@ export type ContextFiles = any[] | null | undefined;
 
 export type ContextExtend = object;
 
-export type ContextAsyncHandler = (context: ContextBase, next: (context: ContextBase) => any) => any;
+export type ContextAsyncHandler = (context: ContextBase, next: () => any) => any;
 
 export interface ContextBase {
   req: IncomingMessage;

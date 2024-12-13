@@ -42,7 +42,7 @@ export function Protected(): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
     const next: Function = descriptor.value;
     descriptor.value = function (context: ContextBase) {
-      Jwt.verify.call(this, context, next.bind(this));
+      Jwt.verify.call(this, context, next.bind(this, context));
     };
     copyAttrToNew(descriptor.value, next);
   };

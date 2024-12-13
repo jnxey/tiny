@@ -3,7 +3,7 @@ import { HomeIndexInput } from './model.test.js';
 
 function execMiddleware(context, next) {
   context.finish(StatusCode.success, new Dto({ code: StatusCode.success, result: 'middleware', msg: 'success' }));
-  next(context);
+  next();
 }
 
 export class Home {

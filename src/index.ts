@@ -8,31 +8,29 @@ import { Router } from '@/router';
 import { Context } from '@/context';
 import http from 'http';
 import { ContextAsyncHandler, ContextBase } from '@/context/types';
+import { FunctionArgs } from '@/types';
+import { Server } from 'net';
 
 export default class Tiny {
-  constructor(beforeEach?: ContextAsyncHandler, afterEach?: (context: ContextBase) => any) {
-    Controller.init({
-      get: Router.getRouteController(MethodType.get),
-      post: Router.getRouteController(MethodType.post),
-      delete: Router.getRouteController(MethodType.delete),
-      put: Router.getRouteController(MethodType.put)
-    });
+  constructor() {}
 
-    // Create HTTP Server
-    return http.createServer(async (req, res) => {
+  public begin?: ContextAsyncHandler;
+  public finish?: (context: ContextBase) => any;
+
+  public listen(...args: FunctionArgs): Server {
+    const server = http.createServer(async (req, res) => {
       const context = new Context(req, res);
-      const next = Router.run;
-      if (beforeEach) {
-        beforeEach(context, next);
+      const next = Router.run.bind(this, context);
+      if (this.begin) {
+        this.begin(context, next);
       } else {
-        next(context);
+        next();
       }
-      if (afterEach) {
-        context.addListenFinish(() => {
-          afterEach(context);
-        });
-      }
+      context.res.on('finish', () => {
+        if (this.finish) this.finish(context);
+      });
     });
+    return server.listen(...args);
   }
 }
 

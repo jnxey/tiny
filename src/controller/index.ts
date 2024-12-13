@@ -2,6 +2,7 @@ import { copyAttrToNew, kebabCase } from '@/tools';
 import { ControllerHandler, ControllerOptions, ControllerRouterFunc } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
 import { ContextAsyncHandler, ContextBase } from '@/context/types';
+import { Router } from '@/router';
 
 export class Controller {
   /*
@@ -17,22 +18,22 @@ export class Controller {
   /*
    * Get Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static get: ControllerRouterFunc = () => {};
+  public static get: ControllerRouterFunc = Router.getRouteController(MethodType.get);
 
   /*
    * Post Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static post: ControllerRouterFunc = () => {};
+  public static post: ControllerRouterFunc = Router.getRouteController(MethodType.post);
 
   /*
    * Delete Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static delete: ControllerRouterFunc = () => {};
+  public static delete: ControllerRouterFunc = Router.getRouteController(MethodType.delete);
 
   /*
    * Put Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
-  public static put: ControllerRouterFunc = () => {};
+  public static put: ControllerRouterFunc = Router.getRouteController(MethodType.put);
 
   /*
    * Apis JSON
@@ -158,7 +159,7 @@ export function Middleware<P1, P2 extends Function>(handler: ContextAsyncHandler
   return function (_, __, descriptor: PropertyDescriptor) {
     const next: Function = descriptor.value;
     descriptor.value = function (context: ContextBase) {
-      handler.call(this, context, next.bind(this));
+      handler.call(this, context, next.bind(this, context));
     };
     copyAttrToNew(descriptor.value, next);
   };

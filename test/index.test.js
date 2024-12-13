@@ -7,14 +7,12 @@ import { initTiny } from './init.test.js';
 const port = 10101;
 const base = 'http://localhost:' + port;
 
-// Create HTTP Server
-const server = new Tiny(
-  async (context, next) => {
-    await bodyHandler(context);
-    next(context);
-  },
-  (context) => {}
-);
+const tiny = new Tiny();
+
+tiny.begin = async (context, next) => {
+  await bodyHandler(context);
+  next();
+};
 
 initTiny();
 
@@ -22,7 +20,7 @@ const output = (value) => value;
 
 Controller.connect(new Home());
 
-server.listen(port, () => {
+const server = tiny.listen(port, () => {
   console.log(`Server running at http://127.0.0.1:${port}/`);
 });
 

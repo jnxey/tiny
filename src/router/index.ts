@@ -2,7 +2,7 @@ import { MethodType } from '@/values';
 import { isObject, parseRoute } from '@/tools';
 import { ControllerRouterFunc } from '@/controller/types';
 import url from 'url';
-import { ContextAsyncHandler, ContextBase } from '@/context/types';
+import { ContextBase } from '@/context/types';
 
 const SymbolParam = ':';
 type RouteItem = { path: string; method: MethodType; handler: Function };
