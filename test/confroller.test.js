@@ -1,4 +1,20 @@
-import { Delete, Get, Type, Params, ParamsSource, Post, Put, StatusCode, Summary, DataType, Middleware, Mapping, Dto } from '../lib/tiny.js';
+import {
+  Delete,
+  Get,
+  Type,
+  Params,
+  ParamsSource,
+  Post,
+  Put,
+  StatusCode,
+  Summary,
+  DataType,
+  Middleware,
+  Mapping,
+  Dto,
+  Jwt,
+  Protected
+} from '../lib/tiny.js';
 import { HomeIndexInput } from './model.test.js';
 
 function execMiddleware(context, next) {
@@ -63,5 +79,20 @@ export class Home {
   @Params.in(HomeIndexInput, ParamsSource.body)
   params(context) {
     context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: context.params, msg: 'success' }));
+  }
+
+  @Post()
+  @Type()
+  @Params.in(HomeIndexInput, ParamsSource.body)
+  jwtSign(context) {
+    const token = Jwt.sign(context, { id: 1, name: 'test' });
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: token, msg: 'success' }));
+  }
+
+  @Post()
+  @Type()
+  @Protected()
+  jwtVerify(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: context.payload, msg: 'success' }));
   }
 }

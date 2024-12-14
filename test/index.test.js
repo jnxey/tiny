@@ -22,6 +22,7 @@ initTiny();
 
 const output = (value) => value;
 
+Controller.init({ prefix: '/api' });
 Controller.connect(new Home());
 
 const server = tiny.listen(port, () => {
@@ -150,6 +151,30 @@ test('-----Router-----', () => {
       .get(base + '/api/home/not-found')
       .then((res) => {
         expect(output(res.status)).toBe(StatusCode.paramsError);
+      })
+      .catch((e) => {});
+  } catch (e) {}
+});
+
+test('-----JWT sign-----', () => {
+  try {
+    axios
+      .post(base + '/api/home/jwt-sign')
+      .then((res) => {
+        expect(output(res.status)).toBe(StatusCode.success);
+        expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: JSON.stringify({ id: 1, name: 'test' }) });
+      })
+      .catch((e) => {});
+  } catch (e) {}
+});
+
+test('-----JWT verify-----', () => {
+  try {
+    axios
+      .post(base + '/api/home/jwt-verify')
+      .then((res) => {
+        expect(output(res.status)).toBe(StatusCode.success);
+        expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: { id: 1, name: 'test' } });
       })
       .catch((e) => {});
   } catch (e) {}

@@ -2,6 +2,7 @@
  * Request method type
  */
 export enum MethodType {
+  head = 'HEAD',
   get = 'GET',
   delete = 'DELETE',
   post = 'POST',

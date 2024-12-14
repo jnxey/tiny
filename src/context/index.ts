@@ -2,6 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { ContextBase, ContextBody, ContextExtend, ContextFiles, ContextParams, ContextPayload, ContextQuery } from '@/context/types';
 import { DataType } from '@/values';
 import { Dto } from '@/dto';
+import { CookieManager } from '@/cookie';
 
 export class Context implements ContextBase {
   public req: IncomingMessage;
@@ -12,10 +13,12 @@ export class Context implements ContextBase {
   public body: ContextBody;
   public files: ContextFiles;
   public extend: ContextExtend = {};
+  public cookie!: CookieManager;
 
   constructor(req: IncomingMessage, res: ServerResponse) {
     this.req = req;
     this.res = res;
+    this.cookie = new CookieManager(req, res);
   }
 
   send(code: number, data: Dto) {

@@ -6,7 +6,7 @@ import { ArrayCheck, Declare, Model, ModelResult, Required, StringLength, TypeCh
 import { DataType, MethodType, ModelConfigCache, ParamsSource, ParamsType, StatusCode } from '@/values';
 import { Router } from '@/router';
 import { Context } from '@/context';
-import http from 'http';
+import http, { IncomingMessage, ServerResponse } from 'http';
 import { ContextAsyncHandler, ContextBase } from '@/context/types';
 import { FunctionArgs, FunctionError } from '@/types';
 import { Server } from 'net';
@@ -20,7 +20,7 @@ export default class Tiny {
   public begin?: ContextAsyncHandler;
 
   /*
-   * Execute after the request is completed, i.e. execute after res triggers pre finish
+   * Execute after the request is completed, i.e. execute after res triggers `prefinish`
    */
   public finish?: (context: ContextBase) => any;
 
@@ -33,9 +33,10 @@ export default class Tiny {
    * Create service port
    */
   public listen(...args: FunctionArgs): Server {
-    const server = http.createServer(async (req, res) => {
+    const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
       try {
         const context = new Context(req, res);
+        if (req.method === MethodType.head) return res.end(); // handler head
         const next = Router.run.bind(this, context);
         if (this.begin) {
           this.begin(context, next);
