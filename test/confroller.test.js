@@ -6,6 +6,7 @@ import {
   ParamsSource,
   Post,
   Put,
+  Patch,
   StatusCode,
   Summary,
   DataType,
@@ -13,7 +14,8 @@ import {
   Mapping,
   Dto,
   Jwt,
-  Protected
+  Protected,
+  Controller
 } from '../lib/tiny.js';
 import { HomeIndexInput } from './model.test.js';
 
@@ -22,7 +24,7 @@ function execMiddleware(context, next) {
   next();
 }
 
-export class Home {
+export class Home extends Controller {
   static MODULE_DESCRIBE = 'Home Test';
 
   @Get()
@@ -48,6 +50,12 @@ export class Home {
   @Type()
   delete(context) {
     context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'delete', msg: 'success' }));
+  }
+
+  @Patch()
+  @Type()
+  patch(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'patch', msg: 'success' }));
   }
 
   @Get()

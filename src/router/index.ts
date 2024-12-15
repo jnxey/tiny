@@ -1,8 +1,10 @@
 import { MethodType } from '@/values';
-import { isObject, parseRoute } from '@/tools';
-import { ControllerRouterFunc } from '@/controller/types';
+import { isObject, parseRoute, syncObjectData } from '@/tools';
 import url from 'url';
 import { ContextBase } from '@/context/types';
+import { RouterApiJson } from '@/router/types';
+import { Controller } from '@/controller';
+import { ConnectOptions } from '@/controller/types';
 
 const SymbolParam = ':';
 type RouteItem = { path: string; method: MethodType; handler: Function };
@@ -11,10 +13,17 @@ interface RoutesList {
 }
 
 export class Router {
+  public options: ConnectOptions = {
+    prefix: '',
+    format: true
+  };
+
+  public ApiJSON: RouterApiJson[] = [];
+
   /*
    * Route list
    */
-  static Routes: RoutesList = {
+  public Routes: RoutesList = {
     GET: { REG: [] },
     POST: { REG: [] },
     PUT: { REG: [] },
@@ -23,16 +32,23 @@ export class Router {
   };
 
   /*
+   * Set Route prefix
+   */
+  public config = (options: ConnectOptions) => {
+    syncObjectData(this.options, options);
+  };
+
+  /*
    * Get Route list
    */
-  static getRoutes = (method?: string) => {
-    return Router.Routes[method || MethodType.get] || { REG: [] };
+  public getRoutes = (method?: string) => {
+    return this.Routes[method || MethodType.get] || { REG: [] };
   };
 
   /*
    * Trigger 404
    */
-  static notFound = (context: ContextBase) => {
+  public notFound = (context: ContextBase) => {
     context.res.writeHead(404, { 'Content-Type': 'text/plain' });
     context.res.end('404 Not Found');
   };
@@ -40,9 +56,9 @@ export class Router {
   /*
    * Server run
    */
-  static run = (context: ContextBase) => {
+  public run = (context: ContextBase) => {
     const parsedUrl = url.parse(context.req.url ?? '', true);
-    const routes = Router.getRoutes(context.req.method);
+    const routes = this.getRoutes(context.req.method);
     const pathname = parsedUrl.pathname ?? '';
     const route = routes[pathname];
     const query = parsedUrl.query || {};
@@ -58,27 +74,22 @@ export class Router {
           return _route.handler(context);
         }
       }
-      return Router.notFound(context);
+      return this.notFound(context);
     }
   };
 
   /*
    * Register Route
    */
-  static register = (path: string, method: MethodType, handler: Function) => {
-    if (path.indexOf(SymbolParam) > -1) {
-      Router.Routes[method].REG.push({ path, method, handler });
-    } else {
-      Router.Routes[method][path] = { path, method, handler };
-    }
-  };
-
-  /*
-   * Get default Controller Route
-   */
-  static getRouteController = (method: MethodType): ControllerRouterFunc => {
-    return (path: string, handler: Function) => {
-      Router.register(path, method, handler);
-    };
+  public register = (controller: Controller) => {
+    const connects = controller.connect(this.options);
+    connects.forEach(({ path, method, handler, options }) => {
+      if (path.indexOf(SymbolParam) > -1) {
+        this.Routes[method].REG.push({ path, method, handler });
+      } else {
+        this.Routes[method][path] = { path, method, handler };
+      }
+      this.ApiJSON.push(options);
+    });
   };
 }

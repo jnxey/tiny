@@ -1,107 +1,49 @@
 import { copyAttrToNew, kebabCase } from '@/tools';
-import { ControllerHandler, ControllerOptions, ControllerRouterFunc } from '@/controller/types';
+import { ConnectOptions, ConnectResult, ControllerHandler } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
 import { ContextAsyncHandler, ContextBase } from '@/context/types';
-import { Router } from '@/router';
 
 export class Controller {
-  /*
-   * Routing prefix
-   */
-  public static prefix: string = '';
-
-  /*
-   * Format module or method names
-   */
-  public static format: boolean = true;
-
-  /*
-   * Get Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
-   */
-  public static get: ControllerRouterFunc = Router.getRouteController(MethodType.get);
-
-  /*
-   * Post Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
-   */
-  public static post: ControllerRouterFunc = Router.getRouteController(MethodType.post);
-
-  /*
-   * Patch Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
-   */
-  public static patch: ControllerRouterFunc = Router.getRouteController(MethodType.patch);
-
-  /*
-   * Delete Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
-   */
-  public static delete: ControllerRouterFunc = Router.getRouteController(MethodType.delete);
-
-  /*
-   * Put Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
-   */
-  public static put: ControllerRouterFunc = Router.getRouteController(MethodType.put);
-
-  /*
-   * Apis JSON
-   */
-  public static apisJSON: object[] = [];
-
-  /*
-   * Init
-   */
-  public static init(options: ControllerOptions) {
-    if (options.prefix) Controller.prefix = options.prefix;
-    if (options.format) Controller.format = options.format;
-    if (options.get) Controller.get = options.get;
-    if (options.post) Controller.post = options.post;
-    if (options.delete) Controller.delete = options.delete;
-    if (options.put) Controller.put = options.put;
-    if (options.patch) Controller.patch = options.patch;
-  }
-
   /*
    * Connect the controller
    * If a method in a class does not use any decorator from [Get, Post, Delete, Put], it will not be considered a Restful method
    */
-  public static connect<T>(instance: T): void {
+  public connect(options: ConnectOptions): ConnectResult[] {
     const constructorName = 'constructor';
-    const constructor = instance[constructorName];
+    const moudleDescribeName = 'MODULE_DESCRIBE';
+    const constructor = this[constructorName];
     const connector = '/';
     const moduleName: string = constructor.name;
-    const describe: string = constructor.MODULE_DESCRIBE;
+    const describe: string = constructor[moudleDescribeName];
     const methods: string[] = Object.getOwnPropertyNames(constructor.prototype);
+    const result: ConnectResult[] = [];
     methods.forEach((name) => {
       if (name === constructorName) return;
-      const handler: ControllerHandler = instance[name];
+      const handler: ControllerHandler = this[name];
       if (!handler.METHOD) return;
-      const module = Controller.format ? kebabCase(moduleName) : moduleName;
-      const func = Controller.format ? kebabCase(name) : name;
-      const prefix = Controller.prefix;
+      const module = options.format ? kebabCase(moduleName) : moduleName;
+      const func = options.format ? kebabCase(name) : name;
+      const prefix = options.prefix;
       const path = handler.MAPPING || prefix + connector + module + connector + func;
-      if (handler.METHOD === MethodType.get) {
-        Controller.get(path, handler);
-      } else if (handler.METHOD === MethodType.delete) {
-        Controller.delete(path, handler);
-      } else if (handler.METHOD === MethodType.post) {
-        Controller.post(path, handler);
-      } else if (handler.METHOD === MethodType.put) {
-        Controller.put(path, handler);
-      } else if (handler.METHOD === MethodType.patch) {
-        Controller.patch(path, handler);
-      }
-      // 以下是接口信息
-      Controller.apisJSON.push({
-        module: module,
-        describe: describe,
-        func: func,
+      result.push({
         path: path,
         method: handler.METHOD,
-        requestType: handler.REQUEST_TYPE,
-        responseType: handler.RESPONSE_TYPE,
-        summary: handler.SUMMARY,
-        paramsModel: handler.PARAMS_MODEL,
-        resultModel: handler.RESULT_MODEL
+        handler: handler,
+        options: {
+          module: module,
+          describe: describe,
+          func: func,
+          path: path,
+          method: handler.METHOD,
+          requestType: handler.REQUEST_TYPE,
+          responseType: handler.RESPONSE_TYPE,
+          summary: handler.SUMMARY,
+          paramsModel: handler.PARAMS_MODEL,
+          resultModel: handler.RESULT_MODEL
+        }
       });
     });
+    return result;
   }
 }
 

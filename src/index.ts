@@ -12,12 +12,15 @@ import { FunctionArgs, FunctionError } from '@/types';
 import { Server } from 'net';
 
 export default class Tiny {
-  constructor() {}
-
   /*
    * Execute before entering the controller after requesting entry
    */
   public begin?: ContextAsyncHandler;
+
+  /*
+   * Execute before entering the controller after requesting entry
+   */
+  public run: Function = () => {};
 
   /*
    * Execute after the request is completed, i.e. execute after res triggers `prefinish`
@@ -37,7 +40,7 @@ export default class Tiny {
       try {
         const context = new Context(req, res);
         if (req.method === MethodType.head) return res.end(); // handler head
-        const next = Router.run.bind(this, context);
+        const next = this.run.bind(this, context);
         if (this.begin) {
           this.begin(context, next);
         } else {

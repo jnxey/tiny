@@ -1,17 +1,29 @@
 import { DataType, MethodType } from '@/values';
-import { ContextBase } from '@/context/types';
 
-export type ControllerRouterFunc = (path: string, handler: Function) => void;
-
-export type ControllerOptions = {
+export type ConnectOptions = {
   prefix?: string;
   format?: boolean;
-  get?: ControllerRouterFunc;
-  post?: ControllerRouterFunc;
-  delete?: ControllerRouterFunc;
-  put?: ControllerRouterFunc;
-  patch?: ControllerRouterFunc;
 };
+
+export type ControllerApiJson = {
+  module: string;
+  describe?: string;
+  func: string;
+  path: string;
+  method: string;
+  requestType?: string;
+  responseType?: string;
+  summary?: string;
+  paramsModel?: object;
+  resultModel?: object;
+};
+
+export interface ConnectResult {
+  path: string;
+  method: MethodType;
+  handler: Function;
+  options: ControllerApiJson;
+}
 
 export interface ControllerHandler {
   <T>(): T;

@@ -3,6 +3,7 @@ import { ContextBase, ContextBody, ContextExtend, ContextFiles, ContextParams, C
 import { DataType } from '@/values';
 import { Dto } from '@/dto';
 import { CookieManager } from '@/cookie';
+import { Router } from '@/router';
 
 export class Context implements ContextBase {
   public req: IncomingMessage;

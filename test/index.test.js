@@ -1,4 +1,4 @@
-import Tiny, { Controller, StatusCode } from '../lib/tiny.js';
+import Tiny, { Router, StatusCode } from '../lib/tiny.js';
 import axios from 'axios';
 import { Home } from './confroller.test.js';
 import { bodyHandler } from './tool.test.js';
@@ -8,10 +8,15 @@ const port = 10101;
 const base = 'http://localhost:' + port;
 
 const tiny = new Tiny();
+const router = new Router();
 
 tiny.begin = async (context, next) => {
-  await bodyHandler(context);
   next();
+};
+
+tiny.run = async (context) => {
+  await bodyHandler(context);
+  router.run(context);
 };
 
 tiny.onerror = (err) => {
@@ -22,25 +27,25 @@ initTiny();
 
 const output = (value) => value;
 
-Controller.init({ prefix: '/api' });
-Controller.connect(new Home());
+router.config({ prefix: '/api' });
+router.register(new Home());
 
 const server = tiny.listen(port, () => {
   console.log(`Server running at http://127.0.0.1:${port}/`);
 });
 
-// console.log(Controller.apisJSON, '---------1');
+// console.log(router.apisJSON, '---------1');
 
 const findFuncJson = (module, func) => {
   let result = null;
-  Controller.apisJSON.forEach((item) => {
+  router.ApiJSON.forEach((item) => {
     if (item.module === module && item.func === func) result = item;
   });
   return result;
 };
 
 test('-----Tiny.init-----', () => {
-  expect(output(Controller.prefix)).toBe('/api');
+  expect(output(router.options.prefix)).toBe('/api');
 });
 
 test('-----Controller.connect-----', () => {
@@ -74,6 +79,12 @@ test('-----Delete-----', async () => {
   const res = await axios.delete(base + '/api/home/delete');
   expect(output(res.status)).toBe(StatusCode.success);
   expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'delete' });
+});
+
+test('-----Patch-----', async () => {
+  const res = await axios.patch(base + '/api/home/patch');
+  expect(output(res.status)).toBe(StatusCode.success);
+  expect(output(res.data)).toEqual({ code: 200, msg: 'success', result: 'patch' });
 });
 
 test('-----Type-----', () => {
