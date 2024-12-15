@@ -18,12 +18,12 @@ export class Router {
     format: true
   };
 
-  public ApiJSON: RouterApiJson[] = [];
+  public apiJSON: RouterApiJson[] = [];
 
   /*
    * Route list
    */
-  public Routes: RoutesList = {
+  public routes: RoutesList = {
     GET: { REG: [] },
     POST: { REG: [] },
     PUT: { REG: [] },
@@ -42,7 +42,7 @@ export class Router {
    * Get Route list
    */
   public getRoutes = (method?: string) => {
-    return this.Routes[method || MethodType.get] || { REG: [] };
+    return this.routes[method || MethodType.get] || { REG: [] };
   };
 
   /*
@@ -56,7 +56,7 @@ export class Router {
   /*
    * Server run
    */
-  public run = (context: ContextBase) => {
+  public work = (context: ContextBase) => {
     const parsedUrl = url.parse(context.req.url ?? '', true);
     const routes = this.getRoutes(context.req.method);
     const pathname = parsedUrl.pathname ?? '';
@@ -85,11 +85,11 @@ export class Router {
     const connects = controller.connect(this.options);
     connects.forEach(({ path, method, handler, options }) => {
       if (path.indexOf(SymbolParam) > -1) {
-        this.Routes[method].REG.push({ path, method, handler });
+        this.routes[method].REG.push({ path, method, handler });
       } else {
-        this.Routes[method][path] = { path, method, handler };
+        this.routes[method][path] = { path, method, handler };
       }
-      this.ApiJSON.push(options);
+      this.apiJSON.push(options);
     });
   };
 }

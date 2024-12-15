@@ -10,13 +10,9 @@ const base = 'http://localhost:' + port;
 const tiny = new Tiny();
 const router = new Router();
 
-tiny.begin = async (context, next) => {
-  next();
-};
-
 tiny.run = async (context) => {
   await bodyHandler(context);
-  router.run(context);
+  router.work(context);
 };
 
 tiny.onerror = (err) => {
@@ -38,7 +34,7 @@ const server = tiny.listen(port, () => {
 
 const findFuncJson = (module, func) => {
   let result = null;
-  router.ApiJSON.forEach((item) => {
+  router.apiJSON.forEach((item) => {
     if (item.module === module && item.func === func) result = item;
   });
   return result;

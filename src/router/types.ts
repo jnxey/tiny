@@ -1,5 +1,3 @@
-import { MethodType } from '@/values';
-
 export type RouterApiJson = {
   module: string;
   describe?: string;

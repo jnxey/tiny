@@ -7,25 +7,24 @@ import { DataType, MethodType, ModelConfigCache, ParamsSource, ParamsType, Statu
 import { Router } from '@/router';
 import { Context } from '@/context';
 import http, { IncomingMessage, ServerResponse } from 'http';
-import { ContextAsyncHandler, ContextBase } from '@/context/types';
+import { ContextBase } from '@/context/types';
 import { FunctionArgs, FunctionError } from '@/types';
 import { Server } from 'net';
 
 export default class Tiny {
   /*
-   * Execute before entering the controller after requesting entry
+   * Error code
    */
-  public begin?: ContextAsyncHandler;
+  public errorCode: number = StatusCode.serveError;
+  /*
+   * Error message
+   */
+  public errorMsg: string = 'Internal Server Error';
 
   /*
-   * Execute before entering the controller after requesting entry
+   * To execute the program, it must be configured before listening
    */
-  public run: Function = () => {};
-
-  /*
-   * Execute after the request is completed, i.e. execute after res triggers `prefinish`
-   */
-  public finish?: (context: ContextBase) => any;
+  public run: (context: ContextBase) => any = () => {};
 
   /*
    * Internal error in monitoring controller
@@ -39,19 +38,10 @@ export default class Tiny {
     const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
       try {
         const context = new Context(req, res);
-        if (req.method === MethodType.head) return res.end(); // handler head
-        const next = this.run.bind(this, context);
-        if (this.begin) {
-          this.begin(context, next);
-        } else {
-          next();
-        }
-        context.res.on('prefinish', () => {
-          if (this.finish) this.finish(context);
-        });
+        this.run(context);
       } catch (e: FunctionError) {
-        res.statusCode = 500;
-        res.end('Internal Server Error');
+        res.statusCode = this.errorCode;
+        res.end(this.errorMsg);
         if (this.onerror) this.onerror(e);
       }
     });
