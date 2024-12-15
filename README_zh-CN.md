@@ -62,7 +62,7 @@
 
 ## 安装
 
-* 安装之前，请下载并安装 Node.js。需要 Node.js V16.0.0 或更高版本。
+* 安装之前，请下载并安装 Node.js。需要 Node.js V18.0.0 或更高版本。
 
 ### 创建一个Tiny应用
 
@@ -108,7 +108,6 @@ const { Controller, Type, Summary, Dto, StatusCode, Get } = Tiny;
 
 export class Manager extends Controller {
   @Get()
-  @Type()
   @Summary('This is a summary')
   public async index(context) {
     context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
@@ -139,10 +138,14 @@ tiny.error = (err) => {
 }
 ```
 * 使用`tiny.errorCode`以及`tiny.errorMsg`配置报错的回文信息，默认为`500`以及`Internal Server Error`
+```typescript
+tiny.errorCode = 500
+tiny.errorMsg = 'Internal Server Error'
+```
 
 ## Context
 
-* `Context`保存了整个请求的上下文信息，以及自定义的其他信息，通常在内部`listen`调用
+* `Context`保存了整个请求的上下文信息，以及自定义的其他信息，通常在`tiny.listen`内部调用
 ```typescript
   function listen(...args): Server {
     const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
@@ -158,49 +161,37 @@ tiny.error = (err) => {
 ```
 
 * `context.req:IncomingMessage`，请求信息
-```typescript
-console.log(context.req)
-```
 
 * `context.res:ServerResponse`，回文信息
+
+* `context.query:ContextQuery`，请求 查询参数 以及 路径参数 ，也意味着两种参数不能重名，在`router.work`内部已经实现，直接使用即可
 ```typescript
-console.log(context.req)
+type ContextQuery = object | null | undefined;
 ```
 
-* `context.query:ContextQuery`，请求 查询参数 以及 路径参数 ，也意味着两种参数不能重名，在router.work内部已经实现，直接使用即可
+* `context.body:ContextBody`，保存在body内的参数，Tiny内部未内置body解析，在`tiny.run`方法中使用第三方库进行解析
 ```typescript
-// type ContextQuery = object | null | undefined;
-console.log(context.query)
+type ContextBody = object | string | null | undefined;
 ```
 
-* `context.body:ContextBody`，保存在body内的参数，Tiny内部未内置body解析，在tiny.run方法中使用第三方库进行解析
+* `context.params:ContextParams`，通过`Tiny.Param.in`校验后参数，在使用`Tiny.Params.in`装饰器后，会自动填入，可直接使用
 ```typescript
-// type ContextBody = object | string | null | undefined;
-console.log(context.body)
-```
-
-* `context.params:ContextParams`，通过`Tiny.Param.in`校验后参数，在使用Params.in装饰器后，会自动填入，可直接使用
-```typescript
-// type ContextParams = object | null | undefined;
-console.log(context.params)
+type ContextParams = object | null | undefined;
 ```
 
 * `context.payload:ContextPayload`，通过`Tiny.Jwt`校验后的信息，在使用`@Protected`装饰器后，会自动填入，可直接使用
 ```typescript
-// type ContextPayload = object | string | null | undefined;
-console.log(context.payload)
+type ContextPayload = object | string | null | undefined;
 ```
 
 * `context.payload:ContextFiles`，可扩充的文件信息，`Tiny`内部未进行设置，在使用`@Protected`装饰器后，会自动填入，可直接使用
 ```typescript
-// type ContextFiles = any[] | null | undefined;
-console.log(context.files)
+type ContextFiles = any[] | null | undefined;
 ```
 
 * `context.extend:ContextExtend`，可扩充的其他信息
 ```typescript
-// type ContextExtend = object;
-console.log(context.extend)
+type ContextExtend = object;
 ```
 
 * `context.cookie:CookieManager`，cookie管理工具，可直接使用
@@ -221,9 +212,6 @@ context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'he
 ```
 
 * `context.setQuery(query: ContextQuery)`，设置地址参数信息，在router.work内部已经实现，直接使用即可
-```typescript
-console.log(context.query)
-```
 
 * `context.setBody(body: ContextBody)`，设置body参数信息，Tiny内部未内置body解析，在tiny.run方法中使用第三方库进行解析
 ```typescript
@@ -259,14 +247,8 @@ class Manager extends Controller {
 ```
 
 * `context.setFiles(files: ContextFiles)`，设置文件信息
-```typescript
-context.setFiles([...files])
-```
 
 * `context.setExtend<T>(name: string, value: T)`，设置扩展信息
-```typescript
-context.setExtend(name, value)
-```
 
 ### Controller
 
