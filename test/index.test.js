@@ -1,4 +1,4 @@
-import Tiny, { Router, StatusCode } from '../lib/tiny.js';
+import Tiny from '../lib/tiny.js';
 import axios from 'axios';
 import { Home } from './confroller.test.js';
 import { bodyHandler } from './tool.test.js';
@@ -6,17 +6,14 @@ import { initTiny } from './init.test.js';
 
 const port = 10101;
 const base = 'http://localhost:' + port;
+const { CreateApp, Router, StatusCode } = Tiny;
 
-const tiny = new Tiny();
+const tiny = new CreateApp();
 const router = new Router();
 
 tiny.run = async (context) => {
   await bodyHandler(context);
   router.work(context);
-};
-
-tiny.onerror = (err) => {
-  console.log(err, '---------------------onerror');
 };
 
 initTiny();

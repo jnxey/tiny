@@ -4,9 +4,9 @@
 
 * [English](https://github.com/jnxey/tiny/)
 
-* Tiny是一个简单的、基于Node+Typescript+Koa2/生态的服务端工具库，它的核心代码只有不到20K，它提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置登录状态、编写API文档的时间，以及其他额外的功能。
+* Tiny是一个简单的、基于Node+Typescript的服务端工具库，它的核心代码很小，提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置登录状态、编写API文档的时间，以及其他额外的功能。
 
-* Tiny旨在提供一个简单的工具库给开发者使用，不涉及部署、运维相关内容。
+* Tiny起源于对koa的思考，由于在使用koa的过程中发现项目容易出现中间件异步混乱问题（仅个人观点），使得Tiny的诞生，因此Tiny的内部的异步可能只存在于`@Middleware`装饰器，`Jwt`校验以及初始的`tiny.run`几个节点中，其他异步请自行处理。
 
 ## 环境
 
@@ -24,21 +24,20 @@
 - [安装](#安装)
 - [使用](#使用)
 - [API描述](#API描述)
+  - [CreateApp](#CreateApp)
+  - [Context](#Context)
   - [Controller](#Controller)
     - [Controller](#Controller)
     - [Get](#Get)
     - [Delete](#Delete)
     - [Post](#Post)
     - [Put](#Put)
-    - [View](#View)
-    - [Json](#Json)
-    - [Text](#Text)
-    - [FormUrlencoded](#FormUrlencoded)
-    - [FormData](#FormData)
-    - [Other](#Other)
-    - [Prefix](#Prefix)
+    - [Patch](#Patch)
+    - [Type](#View)
+    - [Middleware](#Prefix)
     - [Mapping](#Mapping)
     - [Summary](#Summary)
+  - [Router](#Router)
   - [Model](#Model)
     - [Model](#Model)
     - [ModelResult](#ModelResult)
@@ -48,14 +47,11 @@
     - [ArrayCheck](#ArrayCheck)
     - [StringLength](#StringLength)
   - [Params](#Params)
-    - [Params](#Result)
-    - [Result](#Result)
   - [Jwt](#Jwt)
     - [Jwt](#Jwt)
     - [Protected](#Protected)
   - [Dto](#Dto)
     - [Dto](#Dto)
-    - [DtoCtxExtend](#DtoCtxExtend)
   - [Values](#Values)
     - [MethodType](#MethodType)
     - [DataType](#DataType)
@@ -91,97 +87,214 @@ npm install --save koa-tiny
 
 * 文件`index.ts`
 ```typescript
-import Tiny, { Controller } from 'koa-tiny';
-import Koa from 'koa';
-import Router from '@koa/router';
+import Tiny from 'koa-tiny';
 import { Manager } from '@/controller/manager';
 
-const app = new Koa();
+const { CreateApp, Router, StatusCode } = Tiny;
+
+const tiny = new CreateApp();
 const router = new Router();
 
-// 初始化配置
-Tiny.init({
-  controller: { prefix: '/api/' },
-  jwt: { expiresIn: '4h', jsonwebtoken: jsonwebtoken }
-});
+router.config({ prefix: '/api' });
+router.register(new Manager());
 
-// 连接你的控制器
-Controller.connect<Manager>(new Manager(), router);
-
-app.listen(4000);
+tiny.listen(4000);
 ```
 * 文件`@/controller/manager.ts`
 ```typescript
-import { Json, Summary, Dto, StatusCode, Get } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'koa-tiny';
 
-export class Manager {
+const { Controller, Type, Summary, Dto, StatusCode, Get } = Tiny;
+
+export class Manager extends Controller {
   @Get()
-  @Json()
+  @Type()
   @Summary('This is a summary')
-  public async index(ctx: ExtendableContext, next: Next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' });
-    return next();
+  public async index(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
   }
 }
 ```
-* `InitOptions`参数说明
-```typescript
-interface InitOptions {
-  // 控制器配置参数
-  controller?: ControllerOptionsInput;
-  // jwt配置参数
-  jwt?: JwtOptionsInput;
-}
-```
-* ControllerOptionsInput的配置信息详见：[Controller](#Controller)
-* JwtOptionsInput的配置信息详见：[Jwt](#Jwt)
 
 ## API描述
+
+## CreateApp
+
+* 使用`Tiny.CreateApp`可以创建一个Tiny应用
+```typescript
+const tiny = new CreateApp();
+```
+* 使用`tiny.run`可以设置程序运行内容，接收一个请求上下文[Context](#Context)参数，通常在在`tiny.listen`之前进行配置
+```typescript
+tiny.run = async (context) => {
+  // ToDo
+  router.work(context);
+}
+```
+
+* 使用`tiny.error`监听程序执行过程报错处理
+```typescript
+tiny.error = (err) => {
+  // ToDo
+}
+```
+* 使用`tiny.errorCode`以及`tiny.errorMsg`配置报错的回文信息，默认为`500`以及`Internal Server Error`
+
+## Context
+
+* `Context`保存了整个请求的上下文信息，以及自定义的其他信息，通常在内部`listen`调用
+```typescript
+  function listen(...args): Server {
+    const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
+      try {
+        const context = new Context(req, res);
+        this.run(context);
+      } catch (e: FunctionError) {
+        // ...
+      }
+    });
+    return server.listen(...args);
+  }
+```
+
+* `context.req:IncomingMessage`，请求信息
+```typescript
+console.log(context.req)
+```
+
+* `context.res:ServerResponse`，回文信息
+```typescript
+console.log(context.req)
+```
+
+* `context.query:ContextQuery`，请求 查询参数 以及 路径参数 ，也意味着两种参数不能重名，在router.work内部已经实现，直接使用即可
+```typescript
+// type ContextQuery = object | null | undefined;
+console.log(context.query)
+```
+
+* `context.body:ContextBody`，保存在body内的参数，Tiny内部未内置body解析，在tiny.run方法中使用第三方库进行解析
+```typescript
+// type ContextBody = object | string | null | undefined;
+console.log(context.body)
+```
+
+* `context.params:ContextParams`，通过`Tiny.Param.in`校验后参数，在使用Params.in装饰器后，会自动填入，可直接使用
+```typescript
+// type ContextParams = object | null | undefined;
+console.log(context.params)
+```
+
+* `context.payload:ContextPayload`，通过`Tiny.Jwt`校验后的信息，在使用`@Protected`装饰器后，会自动填入，可直接使用
+```typescript
+// type ContextPayload = object | string | null | undefined;
+console.log(context.payload)
+```
+
+* `context.payload:ContextFiles`，可扩充的文件信息，`Tiny`内部未进行设置，在使用`@Protected`装饰器后，会自动填入，可直接使用
+```typescript
+// type ContextFiles = any[] | null | undefined;
+console.log(context.files)
+```
+
+* `context.extend:ContextExtend`，可扩充的其他信息
+```typescript
+// type ContextExtend = object;
+console.log(context.extend)
+```
+
+* `context.cookie:CookieManager`，cookie管理工具，可直接使用
+```typescript
+interface CookieManager {
+  // 通过名称获取cookie
+  get(name: string): string | undefined;
+  // 设置一个cookie
+  set(name: string, value: string, options: CookieOptions = {}): void;
+  // 删除一个cookie
+  delete(name: string, options: CookieOptions = {}): void
+}
+```
+
+* `context.send<T = Dto>(code: number, data: T)`，发送请求信息
+```typescript
+context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
+```
+
+* `context.setQuery(query: ContextQuery)`，设置地址参数信息，在router.work内部已经实现，直接使用即可
+```typescript
+console.log(context.query)
+```
+
+* `context.setBody(body: ContextBody)`，设置body参数信息，Tiny内部未内置body解析，在tiny.run方法中使用第三方库进行解析
+```typescript
+tiny.run = async (context) => {
+  await bodyHandler(context); // 第三方body解析库
+  router.work(context);
+};
+```
+
+* `context.setParams(params: ContextParams)`，设置校验参数信息，在使用Params.in装饰器后，会自动填入，可直接使用
+```typescript
+class Manager extends Controller {
+  @Post()
+  @Type()
+  @Params.in(HomeIndexInput, ParamsSource.body)
+  getParams(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: context.params, msg: 'success' }));
+  }
+}
+```
+
+* `context.setPayload(payload: ContextPayload)`，设置Jwt校验信息，在使用`@Protected`装饰器后，会自动填入，可直接使用
+
+```typescript
+class Manager extends Controller {
+  @Post()
+  @Type()
+  @Protected()
+  jwtVerify(context) {
+    context.send(StatusCode.success, new Dto({code: StatusCode.success, result: context.payload, msg: 'success'}));
+  }
+}
+```
+
+* `context.setFiles(files: ContextFiles)`，设置文件信息
+```typescript
+context.setFiles([...files])
+```
+
+* `context.setExtend<T>(name: string, value: T)`，设置扩展信息
+```typescript
+context.setExtend(name, value)
+```
 
 ### Controller
 
 #### Controller
+* 所有控制器都应该继承`Controller`类
+```typescript
+import Tiny from 'koa-tiny';
 
-* 使用`Controller.connect<T>(instance: T, router: Router)`连接系统的控制器类
-```typescript
-// 连接你的控制器
-Controller.connect<Manager>(new Manager(), router);
-```
-* 使用`Controller.options: ControllerOptionsInput`得到控制器配置项
-```typescript
-// 打印配置
-console.log(Controller.options)
+const { Controller, Type, Summary, Dto, StatusCode, Get } = Tiny;
 
-// 配置类型
-type ControllerOptionsInput = {
-  // API前缀-全局，默认：''
-  prefix?: string;
-  // 是否是驼峰，默认：false
-  hump?: boolean;
-};
-```
-* 使用`Controller.apiInfoJson`得到API的JSON信息
-```typescript
-// 打印JSON信息
-console.log(Controller.apiInfoJson)
-```
-* 使用`Controller.jwtProtectedList`得到jwt受到保护的路由列表
-```typescript
-// 打印列表信息
-console.log(Controller.jwtProtectedList)
+export class Manager extends Controller {
+  @Get()
+  @Type()
+  @Summary('This is a summary')
+  public async index(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
+  }
+}
 ```
 
 #### Get
 
 * 使用`@Get()`装饰器，声明一个Get方法
 ```typescript
-import { Get } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Get()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'koa-tiny';
+export class Manager extends Controller {
+  @Tiny.Get()
+  public async index(context) {
     // ...
   }
 }
@@ -191,12 +304,10 @@ export class Manager {
 
 * 使用`@Delete()`装饰器，声明一个Delete方法
 ```typescript
-import { Delete } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Delete()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'koa-tiny';
+export class Manager extends Controller {
+  @Tiny.Delete()
+  public async index(context) {
     // ...
   }
 }
@@ -206,12 +317,10 @@ export class Manager {
 
 * 使用`@Post()`装饰器，声明一个Post方法
 ```typescript
-import { Post } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'koa-tiny';
+export class Manager extends Controller {
+  @Tiny.Post()
+  public async index(context) {
     // ...
   }
 }
@@ -221,123 +330,64 @@ export class Manager {
 
 * 使用`@Put()`装饰器，声明一个Put方法
 ```typescript
-import { Put } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Put()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'koa-tiny';
+export class Manager extends Controller {
+  @Tiny.Put()
+  public async index(context) {
     // ...
   }
 }
 ```
 
-#### View
+#### Patch
 
-* 使用`@View()`装饰器，声明一个View方法
+* 使用`@Patch()`装饰器，声明一个Patch方法
 ```typescript
-import { View } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @View()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'koa-tiny';
+export class Manager extends Controller {
+  @Tiny.Patch()
+  public async index(context) {
     // ...
   }
 }
 ```
 
-#### Json
+#### Type
 
-* 使用`@Json(handler?: Router.Middleware)`装饰器，声明Body的数据类型
+* 使用`@Type(requestType?: DataType, responseType?: DataType)`声明请求/响应内容类型，默认为`DataType.json`类型
+
 ```typescript
-import { Post, Json } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'koa-tiny';
 
-export class Manager {
-  @Post()
-  @Json()
-  public async index(ctx: ExtendableContext, next: Next) {
+export class Manager extends Controller {
+  @Tiny.Patch()
+  @Tiny.Type(DataType.formData, DataType.formData)
+  public async index(context) {
     // ...
   }
 }
 ```
 
-#### Text
+#### Middleware
 
-* 使用`@Text(handler?: Router.Middleware)`装饰器，声明Body的数据类型
+* 使用`@Middleware(handler: ContextAsyncHandler)`，为控制器设置中间件
 ```typescript
-import { Post, Text } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'koa-tiny';
 
-export class Manager {
-  @Post()
-  @Text()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
+// type ContextAsyncHandler = (context: ContextBase, next: () => any) => any;
+
+function execMiddleware(context, next) {
+  if(context.extend.a) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'middleware', msg: 'success' }));
+  } else {
+    next();
   }
 }
-```
 
-#### FormUrlencoded
-
-* 使用`@FormUrlencoded(handler?: Router.Middleware)`装饰器，声明Body的数据类型
-```typescript
-import { Post, FormUrlencoded } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @FormUrlencoded()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
-  }
-}
-```
-
-#### FormData
-
-* 使用`@FormData(handler?: Router.Middleware)`装饰器，声明Body的数据类型
-```typescript
-import { Post, FormData } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @FormData()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
-  }
-}
-```
-
-#### Other
-
-* 使用`@Other(handler?: Router.Middleware)`装饰器，声明Body的数据类型
-```typescript
-import { Post, Other } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @Other()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
-  }
-}
-```
-
-#### Prefix
-
-* 使用`@Prefix(text: string)`装饰器，设置单个路由的前缀
-```typescript
-import { Post, Prefix } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @Prefix('/test/')
-  public async index(ctx: ExtendableContext, next: Next) {
+export class Manager extends Controller {
+  @Tiny.Patch()
+  @Tiny.Middleware(execMiddleware)
+  public async index(context) {
     // ...
   }
 }
@@ -347,13 +397,11 @@ export class Manager {
 
 * 使用`@Mapping(path: string)`装饰器，重置路由地址
 ```typescript
-import { Post, Prefix } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @Prefix('/manager/test/:id')
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'koa-tiny';
+export class Manager extends Controller {
+  @Tiny.Patch()
+  @Mapping('/manager/test/:id')
+  public async index(context) {
     // ...
   }
 }
@@ -363,17 +411,17 @@ export class Manager {
 
 * 使用`@Summary(text: string)`装饰器，给方法设置说明文旦
 ```typescript
-import { Post, Summary } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
+import Tiny from 'koa-tiny';
+export class Manager extends Controller {
+  @Tiny.Patch()
   @Summary('测试方法')
-  public async index(ctx: ExtendableContext, next: Next) {
+  public async index(context) {
     // ...
   }
 }
 ```
+
+## Router
 
 ## Model
 

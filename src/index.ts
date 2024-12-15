@@ -10,8 +10,9 @@ import http, { IncomingMessage, ServerResponse } from 'http';
 import { ContextBase } from '@/context/types';
 import { FunctionArgs, FunctionError } from '@/types';
 import { Server } from 'net';
+import { isFunction } from '@/tools';
 
-export default class Tiny {
+class CreateApp {
   /*
    * Error code
    */
@@ -29,7 +30,7 @@ export default class Tiny {
   /*
    * Internal error in monitoring controller
    */
-  public onerror?: (err: FunctionError) => any = () => {};
+  public error?: (err: FunctionError) => any = () => {};
 
   /*
    * Create service port
@@ -42,14 +43,16 @@ export default class Tiny {
       } catch (e: FunctionError) {
         res.statusCode = this.errorCode;
         res.end(this.errorMsg);
-        if (this.onerror) this.onerror(e);
+        if (this.error && isFunction(this.error)) this.error(e);
       }
     });
     return server.listen(...args);
   }
 }
 
-export {
+const Tiny = {
+  // CreateApp
+  CreateApp,
   // context
   Context,
   // controller
@@ -87,6 +90,8 @@ export {
   DataType,
   ParamsSource,
   ParamsType,
-  ModelConfigCache,
-  StatusCode
+  StatusCode,
+  ModelConfigCache
 };
+
+export default Tiny;

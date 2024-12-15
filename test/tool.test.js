@@ -1,5 +1,7 @@
-import { DataType, MethodType } from '../lib/tiny.js';
+import Tiny from '../lib/tiny.js';
 import querystring from 'querystring';
+
+const { DataType, MethodType } = Tiny;
 
 /**
  *  Get JSON

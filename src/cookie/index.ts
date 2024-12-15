@@ -31,7 +31,7 @@ export class CookieManager {
    * @param {string} name - The name of the cookie.
    * @returns {string|undefined} The value of the cookie, or undefined if not found.
    */
-  get(name): string | undefined {
+  get(name: string): string | undefined {
     return this.cookies[name];
   }
 

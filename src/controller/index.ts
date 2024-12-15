@@ -6,15 +6,15 @@ import { ContextAsyncHandler, ContextBase } from '@/context/types';
 export class Controller {
   /*
    * Connect the controller
-   * If a method in a class does not use any decorator from [Get, Post, Delete, Put], it will not be considered a Restful method
+   * If a method in a class does not use any decorator from [Get, Post, Delete, Put, Patch], it will not be considered a Restful method
    */
   public connect(options: ConnectOptions): ConnectResult[] {
     const constructorName = 'constructor';
-    const moudleDescribeName = 'MODULE_DESCRIBE';
+    const moduleDescribeName = 'MODULE_DESCRIBE';
     const constructor = this[constructorName];
     const connector = '/';
     const moduleName: string = constructor.name;
-    const describe: string = constructor[moudleDescribeName];
+    const describe: string = constructor[moduleDescribeName];
     const methods: string[] = Object.getOwnPropertyNames(constructor.prototype);
     const result: ConnectResult[] = [];
     methods.forEach((name) => {
@@ -35,8 +35,8 @@ export class Controller {
           func: func,
           path: path,
           method: handler.METHOD,
-          requestType: handler.REQUEST_TYPE,
-          responseType: handler.RESPONSE_TYPE,
+          requestType: handler.REQUEST_TYPE ?? DataType.json,
+          responseType: handler.RESPONSE_TYPE ?? DataType.json,
           summary: handler.SUMMARY,
           paramsModel: handler.PARAMS_MODEL,
           resultModel: handler.RESULT_MODEL
@@ -106,8 +106,8 @@ export function Patch(): Function {
  */
 export function Type(requestType?: DataType, responseType?: DataType): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
-    descriptor.value.REQUEST_TYPE = requestType ?? DataType.json;
-    descriptor.value.RESPONSE_TYPE = responseType ?? DataType.json;
+    descriptor.value.REQUEST_TYPE = requestType;
+    descriptor.value.RESPONSE_TYPE = responseType;
   };
 }
 

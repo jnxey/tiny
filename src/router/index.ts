@@ -18,6 +18,9 @@ export class Router {
     format: true
   };
 
+  /*
+   * Route apiJSON
+   */
   public apiJSON: RouterApiJson[] = [];
 
   /*

@@ -20,9 +20,9 @@ export interface ContextBase {
   req: IncomingMessage;
   res: ServerResponse;
   query: ContextQuery;
+  body: ContextBody;
   params: ContextParams;
   payload: ContextPayload;
-  body: ContextBody;
   files: ContextFiles;
   cookie: CookieManager;
 
@@ -30,11 +30,11 @@ export interface ContextBase {
 
   setQuery(query: ContextQuery): void;
 
+  setBody(body: ContextBody): void;
+
   setParams(params: ContextParams): void;
 
   setPayload(payload: ContextPayload): void;
-
-  setBody(body: ContextBody): void;
 
   setFiles(files: ContextFiles): void;
 

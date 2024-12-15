@@ -1,4 +1,6 @@
-import { Model, Declare, Required, TypeCheck, ParamsType, ArrayCheck } from '../lib/tiny.js';
+import Tiny from '../lib/tiny.js';
+
+const { Model, Declare, Required, TypeCheck, ParamsType, ArrayCheck } = Tiny;
 
 export class HomeIndexInput extends Model {
   @Declare()

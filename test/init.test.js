@@ -1,5 +1,7 @@
-import { Jwt } from '../lib/tiny.js';
+import Tiny from '../lib/tiny.js';
 import { getJSON } from './tool.test.js';
+
+const { Jwt } = Tiny;
 
 export function initTiny() {
   Jwt.init({

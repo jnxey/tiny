@@ -1,4 +1,7 @@
-import {
+import Tiny from '../lib/tiny.js';
+import { HomeIndexInput } from './model.test.js';
+
+const {
   Delete,
   Get,
   Type,
@@ -16,8 +19,7 @@ import {
   Jwt,
   Protected,
   Controller
-} from '../lib/tiny.js';
-import { HomeIndexInput } from './model.test.js';
+} = Tiny;
 
 function execMiddleware(context, next) {
   context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'middleware', msg: 'success' }));
