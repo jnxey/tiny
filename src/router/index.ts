@@ -18,6 +18,7 @@ export class Router {
     GET: { REG: [] },
     POST: { REG: [] },
     PUT: { REG: [] },
+    PATCH: { REG: [] },
     DELETE: { REG: [] }
   };
 

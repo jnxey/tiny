@@ -3,10 +3,12 @@
  */
 export enum MethodType {
   head = 'HEAD',
+  options = 'OPTIONS',
   get = 'GET',
   delete = 'DELETE',
   post = 'POST',
-  put = 'PUT'
+  put = 'PUT',
+  patch = 'PATCH'
 }
 
 /*

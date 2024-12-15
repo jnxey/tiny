@@ -26,6 +26,11 @@ export class Controller {
   public static post: ControllerRouterFunc = Router.getRouteController(MethodType.post);
 
   /*
+   * Patch Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
+   */
+  public static patch: ControllerRouterFunc = Router.getRouteController(MethodType.patch);
+
+  /*
    * Delete Route Mapping, Path is url, Handler is processor, Middleware comes from the Handler decorator
    */
   public static delete: ControllerRouterFunc = Router.getRouteController(MethodType.delete);
@@ -50,6 +55,7 @@ export class Controller {
     if (options.post) Controller.post = options.post;
     if (options.delete) Controller.delete = options.delete;
     if (options.put) Controller.put = options.put;
+    if (options.patch) Controller.patch = options.patch;
   }
 
   /*
@@ -79,6 +85,8 @@ export class Controller {
         Controller.post(path, handler);
       } else if (handler.METHOD === MethodType.put) {
         Controller.put(path, handler);
+      } else if (handler.METHOD === MethodType.patch) {
+        Controller.patch(path, handler);
       }
       // 以下是接口信息
       Controller.apisJSON.push({
@@ -139,6 +147,15 @@ export function Post(): Function {
 export function Put(): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
     descriptor.value.METHOD = MethodType.put;
+  };
+}
+
+/*
+ * Patch Decorator
+ */
+export function Patch(): Function {
+  return function (_, __, descriptor: PropertyDescriptor) {
+    descriptor.value.METHOD = MethodType.patch;
   };
 }
 

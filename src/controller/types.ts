@@ -10,6 +10,7 @@ export type ControllerOptions = {
   post?: ControllerRouterFunc;
   delete?: ControllerRouterFunc;
   put?: ControllerRouterFunc;
+  patch?: ControllerRouterFunc;
 };
 
 export interface ControllerHandler {
