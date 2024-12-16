@@ -4,9 +4,9 @@
 
 * [English](https://github.com/jnxey/tiny/)
 
-* Tiny是一个简单的、基于Node+Typescript的服务端工具库，它的核心代码很小，提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置`Jwt`、编写`API`文档的时间，以及其他额外的功能。
+* Tiny是一个简单的、基于`Node+Typescript`的服务端框架，它的核心代码很小，提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置`Jwt`、编写`API`文档的时间，以及其他额外的功能。
 
-* Tiny的诞生源于在Node开发过程中项目容易出现异步代码混乱问题，因此Tiny内部的异步存在于`@Middleware`装饰器，`Jwt`校验以及初始的`tiny.run`几个节点中，其他异步请自行处理。
+* Tiny的诞生源于在Node开发过程中容易出现异步代码混乱问题，和其他框架不同，它对异步中间件的使用进行了限制，通常建议只在控制器的方法上使用`@Middleware`装饰器进行设置，它的优点是不会让异步代码太过于混乱，缺点是不够灵活。
 
 ## 环境
 
@@ -541,7 +541,7 @@ class LoginInput extends Model {
 }
 ```
 
-### TypeCustom
+#### TypeCustom
 
 * 使用`@TypeCustom<T>(valid: (value: T) => ModelResult)`装饰器，设置自定义校验内容，返回一个`ModelResult`
 ```typescript
@@ -561,7 +561,7 @@ class LoginInput extends Model {
 
 #### Params
 
-* 使用`@Params.in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1, P2>(p1: P1, p2: P2) => T)`装饰器，设置入参校验
+* 使用`@Params.in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true)`装饰器，设置入参校验
 ```typescript
 import Tiny from 'node-tiny';
 const { Controller, Post, Params } = Tiny;
