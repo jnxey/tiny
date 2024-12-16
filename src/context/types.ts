@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { Dto } from '@/dto';
 import { CookieManager } from '@/cookie';
+import { DataType } from '@/values';
 
 export type ContextQuery = object | null | undefined;
 
@@ -26,7 +27,7 @@ export interface ContextBase {
   files: ContextFiles;
   cookie: CookieManager;
 
-  send(code: number, data: Dto): void;
+  send<T = Dto>(code: number, data: T, type?: DataType): void;
 
   setQuery(query: ContextQuery): void;
 

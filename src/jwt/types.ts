@@ -1,10 +1,7 @@
 import { ContextAsyncHandler, ContextBase } from '@/context/types';
 
-export type JwtSign = (context: ContextBase) => string | null | undefined;
+export type JwtSign = <Payload = object>(context: ContextBase, payload: Payload) => string | null | undefined;
 
 export type JwtVerify = ContextAsyncHandler;
 
-export type JwtOptions = {
-  verify?: JwtVerify;
-  sign?: JwtSign;
-};
+export type JwtRefuse = (context: ContextBase) => any;

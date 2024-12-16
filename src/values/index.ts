@@ -53,6 +53,8 @@ export const StatusCode = {
   success: 200,
   paramsError: 400,
   authError: 401,
+  notFound: 404,
+  timeout: 408,
   serveError: 500
 };
 
@@ -60,3 +62,13 @@ export const StatusCode = {
  * Cache parameter configuration key
  */
 export const ModelConfigCache = 'PARAMS_CONFIG_CACHE';
+
+/*
+ * Permission verification failure prompt
+ */
+export const JwtVerifyRefuse = 'Permission verification failed';
+
+/*
+ * Router Not Found Prompt
+ */
+export const RouterNotFound = '404 Not Found';

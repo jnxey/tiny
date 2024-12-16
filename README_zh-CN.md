@@ -4,9 +4,9 @@
 
 * [English](https://github.com/jnxey/tiny/)
 
-* Tiny是一个简单的、基于Node+Typescript的服务端工具库，它的核心代码很小，提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置登录状态、编写API文档的时间，以及其他额外的功能。
+* Tiny是一个简单的、基于Node+Typescript的服务端工具库，它的核心代码很小，提供了许多有意思的类以及装饰器，可以帮助你节约配置路由、校验参数、设置`Jwt`、编写`API`文档的时间，以及其他额外的功能。
 
-* Tiny起源于对koa的思考，由于在使用koa的过程中发现项目容易出现中间件异步混乱问题（仅个人观点），使得Tiny的诞生，因此Tiny的内部的异步可能只存在于`@Middleware`装饰器，`Jwt`校验以及初始的`tiny.run`几个节点中，其他异步请自行处理。
+* Tiny的诞生源于在Node开发过程中项目容易出现异步代码混乱问题，因此Tiny内部的异步存在于`@Middleware`装饰器，`Jwt`校验以及初始的`tiny.run`几个节点中，其他异步请自行处理。
 
 ## 环境
 
@@ -33,19 +33,19 @@
     - [Post](#Post)
     - [Put](#Put)
     - [Patch](#Patch)
-    - [Type](#View)
-    - [Middleware](#Prefix)
+    - [Type](#Type)
+    - [Middleware](#Middleware)
     - [Mapping](#Mapping)
     - [Summary](#Summary)
   - [Router](#Router)
   - [Model](#Model)
     - [Model](#Model)
-    - [ModelResult](#ModelResult)
     - [Declare](#Declare)
     - [Required](#Required)
     - [TypeCheck](#TypeCheck)
     - [ArrayCheck](#ArrayCheck)
     - [StringLength](#StringLength)
+    - [TypeCustom](#TypeCustom)
   - [Params](#Params)
   - [Jwt](#Jwt)
     - [Jwt](#Jwt)
@@ -69,13 +69,13 @@
 * 创建基于Tiny的项目可以使用Tiny提供的项目模版，该模版设置了简单的项目结构，可供您参考。
 
 ```shell
-npm create koa-tiny <project-name>
+npm create node-tiny <project-name>
 ```
 
 ### 在已有项目中安装Tiny
 
 ```shell
-npm install --save koa-tiny
+npm install --save node-tiny
 ```
 
 ### 查看当前API信息
@@ -87,10 +87,10 @@ npm install --save koa-tiny
 
 * 文件`index.ts`
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 import { Manager } from '@/controller/manager';
 
-const { CreateApp, Router, StatusCode } = Tiny;
+const { CreateApp, Router } = Tiny;
 
 const tiny = new CreateApp();
 const router = new Router();
@@ -102,9 +102,8 @@ tiny.listen(4000);
 ```
 * 文件`@/controller/manager.ts`
 ```typescript
-import Tiny from 'koa-tiny';
-
-const { Controller, Type, Summary, Dto, StatusCode, Get } = Tiny;
+import Tiny from 'node-tiny';
+const { Controller, Summary, Dto, StatusCode, Get } = Tiny;
 
 export class Manager extends Controller {
   @Get()
@@ -123,15 +122,14 @@ export class Manager extends Controller {
 ```typescript
 const tiny = new CreateApp();
 ```
-* 使用`tiny.run`可以设置程序运行内容，接收一个请求上下文[Context](#Context)参数，通常在在`tiny.listen`之前进行配置
+* 使用`tiny.run`可以设置程序运行内容，接收一个请求上下文[Context](#Context)参数，通常在`tiny.listen`之前进行配置
 ```typescript
 tiny.run = async (context) => {
-  // ToDo
   router.work(context);
 }
 ```
 
-* 使用`tiny.error`监听程序执行过程报错处理
+* 使用`tiny.error`监听程序执行过程报错
 ```typescript
 tiny.error = (err) => {
   // ToDo
@@ -145,7 +143,7 @@ tiny.errorMsg = 'Internal Server Error'
 
 ## Context
 
-* `Context`保存了整个请求的上下文信息，以及自定义的其他信息，通常在`tiny.listen`内部调用
+* `Context`保存了整个请求的上下文信息，以及自定义的其他信息，以下是在`tiny.listen`内部的调用过程
 ```typescript
   function listen(...args): Server {
     const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
@@ -169,12 +167,12 @@ tiny.errorMsg = 'Internal Server Error'
 type ContextQuery = object | null | undefined;
 ```
 
-* `context.body:ContextBody`，保存在body内的参数，Tiny内部未内置body解析，在`tiny.run`方法中使用第三方库进行解析
+* `context.body:ContextBody`，保存在body内的参数，Tiny内部未内置body解析，可在`tiny.run`方法中使用第三方库进行解析
 ```typescript
 type ContextBody = object | string | null | undefined;
 ```
 
-* `context.params:ContextParams`，通过`Tiny.Param.in`校验后参数，在使用`Tiny.Params.in`装饰器后，会自动填入，可直接使用
+* `context.params:ContextParams`，通过`@Tiny.Param.in`校验后的参数，会自动填入，可直接使用
 ```typescript
 type ContextParams = object | null | undefined;
 ```
@@ -206,7 +204,7 @@ interface CookieManager {
 }
 ```
 
-* `context.send<T = Dto>(code: number, data: T)`，发送请求信息
+* `context.send<T = Dto>(code: number, data: T, type?: DataType)`，发送请求信息
 ```typescript
 context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
 ```
@@ -255,13 +253,11 @@ class Manager extends Controller {
 #### Controller
 * 所有控制器都应该继承`Controller`类
 ```typescript
-import Tiny from 'koa-tiny';
-
-const { Controller, Type, Summary, Dto, StatusCode, Get } = Tiny;
+import Tiny from 'node-tiny';
+const { Controller, Summary, Dto, StatusCode, Get } = Tiny;
 
 export class Manager extends Controller {
   @Get()
-  @Type()
   @Summary('This is a summary')
   public async index(context) {
     context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
@@ -273,7 +269,7 @@ export class Manager extends Controller {
 
 * 使用`@Get()`装饰器，声明一个Get方法
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Get()
   public async index(context) {
@@ -286,7 +282,7 @@ export class Manager extends Controller {
 
 * 使用`@Delete()`装饰器，声明一个Delete方法
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Delete()
   public async index(context) {
@@ -299,7 +295,7 @@ export class Manager extends Controller {
 
 * 使用`@Post()`装饰器，声明一个Post方法
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Post()
   public async index(context) {
@@ -312,7 +308,7 @@ export class Manager extends Controller {
 
 * 使用`@Put()`装饰器，声明一个Put方法
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Put()
   public async index(context) {
@@ -325,7 +321,7 @@ export class Manager extends Controller {
 
 * 使用`@Patch()`装饰器，声明一个Patch方法
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Patch()
   public async index(context) {
@@ -339,7 +335,7 @@ export class Manager extends Controller {
 * 使用`@Type(requestType?: DataType, responseType?: DataType)`声明请求/响应内容类型，默认为`DataType.json`类型
 
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 
 export class Manager extends Controller {
   @Tiny.Patch()
@@ -354,10 +350,7 @@ export class Manager extends Controller {
 
 * 使用`@Middleware(handler: ContextAsyncHandler)`，为控制器设置中间件
 ```typescript
-import Tiny from 'koa-tiny';
-
-// type ContextAsyncHandler = (context: ContextBase, next: () => any) => any;
-
+import Tiny from 'node-tiny';
 function execMiddleware(context, next) {
   if(context.extend.a) {
     context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'middleware', msg: 'success' }));
@@ -379,7 +372,7 @@ export class Manager extends Controller {
 
 * 使用`@Mapping(path: string)`装饰器，重置路由地址
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Patch()
   @Mapping('/manager/test/:id')
@@ -391,9 +384,9 @@ export class Manager extends Controller {
 
 #### Summary
 
-* 使用`@Summary(text: string)`装饰器，给方法设置说明文旦
+* 使用`@Summary(text: string)`装饰器，给方法设置说明文档
 ```typescript
-import Tiny from 'koa-tiny';
+import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Patch()
   @Summary('测试方法')
@@ -404,6 +397,63 @@ export class Manager extends Controller {
 ```
 
 ## Router
+
+* 使用`Router`创建路由实例
+
+```typescript
+const router = new Router()
+```
+
+* `router.options:ConnectOptions`是路由配置项
+```typescript
+type ConnectOptions = {
+  prefix?: string;
+  format?: boolean;
+};
+```
+
+* `router.apiJSON:RouterApiJson[]`是api配置JSON信息，可以借此生成API文档
+```typescript
+type RouterApiJson = {
+  module: string;
+  describe?: string;
+  func: string;
+  path: string;
+  method: string;
+  requestType?: string;
+  responseType?: string;
+  summary?: string;
+  paramsModel?: object;
+  resultModel?: object;
+};
+```
+
+* `router.routes:RoutesList`是已配置的路由列表
+```typescript
+type RouteItem = { path: string; method: MethodType; handler: Function };
+type RouteValue = {
+  REG: RouteItem[];
+  [path: string]: RouteItem | RouteItem[];
+};
+type RoutesList = {
+  GET: RouteValue;
+  POST: RouteValue;
+  PUT: RouteValue;
+  PATCH: RouteValue;
+  DELETE: RouteValue;
+};
+```
+
+* `router.config(options: ConnectOptions)`设置路由配置项
+
+* `router.notFound(context: ContextBase)`未找到路由，触发404报错
+
+* `router.work(context: ContextBase)`路由开始执行
+
+* `router.register(controller: Controller)`注册路由
+```typescript
+router.register(new Manager());
+```
 
 ## Model
 
@@ -428,8 +478,7 @@ if(result.valid) {
 
 * 使用`model<Model>.getConfigCache`获取当前模型配置
 ```typescript
-const input = new LoginInput();
-console.log(input.getConfigCache())
+new LoginInput().getConfigCache();
 ```
 
 ##### ModelResult
@@ -470,7 +519,7 @@ class LoginInput extends Model {
 
 #### ArrayCheck
 
-* 使用`@ArrayCheck(type: ParamsType | T, message?: string, maxLength?: number)`装饰器，设置数组类型检查，前置条件为`TypeCheck`设置`ParamsType.array`
+* 使用`@ArrayCheck(type: ParamsType | T, message?: string, maxLength?: number, maxLengthMessage?: string)`装饰器，设置数组类型检查，前置条件为`TypeCheck`设置`ParamsType.array`
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -492,14 +541,30 @@ class LoginInput extends Model {
 }
 ```
 
+### TypeCustom
+
+* 使用`@TypeCustom<T>(valid: (value: T) => ModelResult)`装饰器，设置自定义校验内容，返回一个`ModelResult`
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  @TypeCustom((value) => {
+    if(value) {
+      // ...
+    }
+    return new Tiny.ModelResult(true,'', value);
+  })
+  name!: string;
+}
+```
+
 ### Params
 
 #### Params
 
-* 使用`@Params<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1, P2>(p1: P1, p2: P2) => T)`装饰器，设置入参校验
+* 使用`@Params.in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1, P2>(p1: P1, p2: P2) => T)`装饰器，设置入参校验
 ```typescript
-import { Post, Params } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'node-tiny';
+const { Controller, Post, Params } = Tiny;
 
 class LoginInput extends Model {
   @Declare()
@@ -509,23 +574,20 @@ class LoginInput extends Model {
   password!: string;
 }
 
-export class Manager {
+export class Manager extends Controller {
   @Post()
-  @Params(LoginInput, ParamsSource.body)
-  public async index(ctx: ExtendableContext, next: Next, extend: DtoCtxExtend<LoginInput, null>) {
-    console.log(extend.params.name)
-    console.log(extend.params.password)
+  @Params.in(LoginInput, ParamsSource.body)
+  public async index(context) {
+    console.log(context.params.name)
+    console.log(context.params.password)
     // ...
   }
 }
 ```
-
-#### Result
-
-* 使用`@Result<T extends Model>(result: { new (): T })`装饰器，设置出参类型
+* 使用`@Params.out<T extends Model>(result: { new (): T })`装饰器，设置出参类型
 ```typescript
-import { Post, Params, Dto, StatusCode } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'node-tiny';
+const { Controller, Post, Params, Dto, StatusCode } = Tiny;
 
 class LoginOut extends Model {
   @Declare()
@@ -535,14 +597,14 @@ class LoginOut extends Model {
   name!: string;
 }
 
-export class Manager {
+export class Manager extends Controller {
   @Post()
-  @Result(LoginOut)
-  public async index(ctx: ExtendableContext, next: Next) {
+  @Params.out(LoginOut)
+  public async index(context) {
     // ...
     const info = new LoginOut();
     info.fill({...});
-    ctx.body = new Dto({ code: StatusCode.success, result: info, msg: 'success' });
+    // ...
   }
 }
 ```
@@ -551,62 +613,44 @@ export class Manager {
 
 #### Jwt
 
-* 使用`Jwt.sign<T>(ctx: ExtendableContext, payload: T)`生成token
+* 配置`Jwt.sign = <Payload = object>(context: ContextBase, payload: Payload) => string | null | undefined;`生成token
 ```typescript
-Jwt.sign<JwtPayload>(ctx, {...});
-```
-* 使用`Jwt.verify<T>(ctx: ExtendableContext): T | null`验证token
-```typescript
-const payload = Jwt.verify(ctx);
-```
-* 使用`Jwt.options`得到控制器配置项
-```typescript
-// 打印配置
-console.log(Jwt.options)
-
-// 配置信息
-type JwtOptionsInput = {
-  // jsonwebtoken类，详见：https://github.com/auth0/node-jsonwebtoken
-  jsonwebtoken: {
-    verify: Function;
-    sign: Function;
-  };
-  // 私钥key，默认：'shared-secret'
-  privateKey?: string;
-  // 算法名称，默认：HS256
-  algorithms?: string;
-  // 过期时间，默认：24h
-  expiresIn?: string;
-  // 不验证令牌的过期时间，默认：false
-  ignoreExpiration?: boolean;
-  // 验证不通过返回的错误码，默认：408
-  errorCode?: number;
-  // 验证不通过返回的错误信息，默认：Unauthorized access
-  errorMsg?: string;
-  // 保存token的key：'token'
-  tokenKey?: string;
-  // 自定义获取token的方法
-  getToken?: (ctx: ExtendableContext) => string | undefined;
-  // 自定义设置token的方法
-  setToken?: (ctx: ExtendableContext, value: string) => any;
-  // 自定义是否重置token
-  isResetToken?: (ctx: ExtendableContext) => boolean;
+Jwt.sign = (context, payload) => {
+  context.cookie.set('token', JSON.stringify(payload));
+  return JSON.stringify(payload);
 };
+```
+* 配置`Jwt.verify = (context: ContextBase, next: () => any) => any;`验证token
+```typescript
+Jwt.verify = (context, next) => {
+  const token = context.cookie.get('token');
+  if (token) {
+    context.setPayload(getJSON(token));
+    next();
+  } else {
+    Jwt.refuse(context);
+  }
+}
+```
+* 配置`Jwt.refuse = (context: ContextBase) => any;`处理校验失败，默认是如下处理
+```typescript
+Jwt.refuse = (context, next) => {
+  context.send(StatusCode.success, new Dto({ code: StatusCode.authError, msg: 'No permission to access temporarily', result: null }));
+}
 ```
 
 #### Protected
 
-* 使用`@Protected()`装饰器，配置后的方法将进行JWT验证
+* 使用`@Protected()`装饰器，配置后的方法将进行`Jwt`验证
 ```typescript
-import { Post, Protected } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-import { YouPayload } from '....'
+import Tiny  from 'node-tiny';
+const { Controller, Post, Protected } = Tiny;
 
-export class Manager {
+export class Manager extends Controller {
   @Post()
   @Protected()
-  public async index(ctx: ExtendableContext, next: Next, extend: DtoCtxExtend<null, YouPayload>) {
-    console.log(extend.payload)
+  public async index(context) {
+    console.log(context.payload)
     // ...
   }
 }
@@ -618,10 +662,6 @@ export class Manager {
 
 * 使用`new Dto({ code: number | string, result?: any, msg?: string })`设置Response返回码
 
-#### DtoCtxExtend
-
-* 使用`new DtoCtxExtend<P1,P2>({ params: P1, payload: P2 })`设置ctx额外参数(Tiny内部使用)
-
 ### Values
 
 #### MethodType
@@ -629,11 +669,13 @@ export class Manager {
 * 请求类型
 ```typescript
 export enum MethodType {
-  get = 'get',
-  delete = 'delete',
-  post = 'post',
-  put = 'put',
-  view = 'view'
+  head = 'HEAD',
+  options = 'OPTIONS',
+  get = 'GET',
+  delete = 'DELETE',
+  post = 'POST',
+  put = 'PUT',
+  patch = 'PATCH'
 }
 ```
 
@@ -644,6 +686,8 @@ export enum MethodType {
 export enum DataType {
   json = 'application/json',
   text = 'text/plain',
+  html = 'text/html',
+  xml = 'text/xml',
   formUrlencoded = 'application/x-www-form-urlencoded',
   formData = 'multipart/form-data',
   other = 'other'
@@ -679,7 +723,9 @@ export enum ParamsType {
 export const StatusCode = {
   success: 200,
   paramsError: 400,
-  authError: 408,
+  authError: 401,
+  notFound: 404,
+  timeout: 408,
   serveError: 500
 };
 ```

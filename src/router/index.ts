@@ -1,16 +1,12 @@
-import { MethodType } from '@/values';
+import { DataType, MethodType, RouterNotFound, StatusCode } from '@/values';
 import { isObject, parseRoute, syncObjectData } from '@/tools';
 import url from 'url';
 import { ContextBase } from '@/context/types';
-import { RouterApiJson } from '@/router/types';
+import { RouterApiJson, RoutesList } from '@/router/types';
 import { Controller } from '@/controller';
 import { ConnectOptions } from '@/controller/types';
 
 const SymbolParam = ':';
-type RouteItem = { path: string; method: MethodType; handler: Function };
-interface RoutesList {
-  [name: string]: { REG: RouteItem[] };
-}
 
 export class Router {
   public options: ConnectOptions = {
@@ -35,6 +31,13 @@ export class Router {
   };
 
   /*
+   * Get Route list
+   */
+  _getRoutes = (method?: string) => {
+    return this.routes[method || MethodType.get] || { REG: [] };
+  };
+
+  /*
    * Set Route prefix
    */
   public config = (options: ConnectOptions) => {
@@ -42,18 +45,10 @@ export class Router {
   };
 
   /*
-   * Get Route list
-   */
-  public getRoutes = (method?: string) => {
-    return this.routes[method || MethodType.get] || { REG: [] };
-  };
-
-  /*
    * Trigger 404
    */
   public notFound = (context: ContextBase) => {
-    context.res.writeHead(404, { 'Content-Type': 'text/plain' });
-    context.res.end('404 Not Found');
+    context.send<string>(StatusCode.notFound, RouterNotFound, DataType.text);
   };
 
   /*
@@ -61,7 +56,7 @@ export class Router {
    */
   public work = (context: ContextBase) => {
     const parsedUrl = url.parse(context.req.url ?? '', true);
-    const routes = this.getRoutes(context.req.method);
+    const routes = this._getRoutes(context.req.method);
     const pathname = parsedUrl.pathname ?? '';
     const route = routes[pathname];
     const query = parsedUrl.query || {};

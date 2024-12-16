@@ -52,8 +52,8 @@ export class Context implements ContextBase {
   /*
    * `context.send`，发送请求信息
    */
-  send<T = Dto>(code: number, data: T) {
-    this.res.writeHead(code, { 'Content-Type': DataType.json });
+  send<T = Dto>(code: number, data: T, type: DataType = DataType.json) {
+    this.res.writeHead(code, { 'Content-Type': type });
     if (isObject(data) || isArray(data)) {
       this.res.end(JSON.stringify(data));
     } else {

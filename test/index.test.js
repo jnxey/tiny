@@ -1,12 +1,11 @@
 import Tiny from '../lib/tiny.js';
 import axios from 'axios';
 import { Home } from './confroller.test.js';
-import { bodyHandler } from './tool.test.js';
-import { initTiny } from './init.test.js';
+import { bodyHandler, getJSON } from './tool.test.js';
 
 const port = 10101;
 const base = 'http://localhost:' + port;
-const { CreateApp, Router, StatusCode } = Tiny;
+const { CreateApp, Router, StatusCode, Jwt } = Tiny;
 
 const tiny = new CreateApp();
 const router = new Router();
@@ -16,7 +15,19 @@ tiny.run = async (context) => {
   router.work(context);
 };
 
-initTiny();
+Jwt.sign = function (context, payload) {
+  context.cookie.set('token', JSON.stringify(payload));
+  return JSON.stringify(payload);
+};
+Jwt.verify = function (context, next) {
+  const token = context.cookie.get('token');
+  if (token) {
+    context.setPayload(getJSON(token));
+    next();
+  } else {
+    Jwt.refuse(context);
+  }
+};
 
 const output = (value) => value;
 

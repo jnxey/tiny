@@ -1,7 +1,7 @@
 import { copyAttrToNew } from '@/tools';
-import { JwtOptions, JwtSign, JwtVerify } from '@/jwt/types';
+import { JwtRefuse, JwtSign, JwtVerify } from '@/jwt/types';
 import { ContextBase } from '@/context/types';
-import { StatusCode } from '@/values';
+import { JwtVerifyRefuse, StatusCode } from '@/values';
 import { Dto } from '@/dto';
 
 /*
@@ -21,17 +21,9 @@ export class Jwt {
   /*
    * Perform JWT verification refuse
    */
-  static refuse = (context: ContextBase) => {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.authError, msg: 'No permission to access temporarily', result: null }));
+  public static refuse: JwtRefuse = (context: ContextBase) => {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.authError, msg: JwtVerifyRefuse, result: null }));
   };
-
-  /*
-   * Initialize JWT configuration
-   */
-  public static init(options: JwtOptions) {
-    if (options.sign) Jwt.sign = options.sign;
-    if (options.verify) Jwt.verify = options.verify;
-  }
 }
 
 /*
