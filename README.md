@@ -1,12 +1,12 @@
 # Tiny
 
-## Introduction
+## Introduce
 
 * [简体中文](https://github.com/jnxey/tiny/blob/main/README_zh-CN.md)
 
-* Tiny is a simple server-side tool library based on Node+Typescript+Koa2/ecosystem, with core code of less than 20K. It provides many interesting classes and decorators that can help you save time on configuring routes, validating parameters, setting login states, writing API documentation, and other additional functionalities.
+* Tiny is a simple server-side framework based on `Node+Typescript`. Its core code is very small and provides many interesting classes and decorators to help you save time configuring routes, validating parameters, setting up `Jwt`, writing `API` documentation, and other additional features.
 
-* Tiny aims to provide a simple tool library for developers, without involving deployment or operational content.
+* Tiny was born out of the problem of asynchronous code confusion that is prone to occur during Node development. Unlike other frameworks, it restricts the use of asynchronous middleware. It is usually recommended to only use the `@Middleware` decorator on the controller method for setting. Its advantage is that it will not make the asynchronous code too confusing, but its disadvantage is that it is not flexible enough.
 
 ## Environment
 
@@ -14,190 +14,265 @@
 ![NPM Version][npm-image]
 
 [node-image]: https://camo.githubusercontent.com/4cef9791aaa5dd6100e2361cd25eeef3beb77b0d879702349fa4ac78211bcb7e/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f6e6f64652d25323025334525334425323031382d343763323139
-
 [npm-image]: https://camo.githubusercontent.com/b133c2aa426b98acd72f5aa52d309ba036a825616acf8994f1f2e115dbffe965/68747470733a2f2f696d672e736869656c64732e696f2f6e706d2f762f6d7174742e7376673f6c6f676f3d6e706d
 
 ## Directory
 
-- [Introduction](#Introduction)
+- [Introduce](#Introduce)
 - [Environment](#Environment)
 - [Directory](#Directory)
-- [Installation](#Installation)
-- [Usage](#Usage)
+- [Install](#Install)
+- [Use](#Use)
 - [API Description](#API-Description)
+  - [CreateApp](#CreateApp)
+  - [Context](#Context)
   - [Controller](#Controller)
     - [Controller](#Controller)
     - [Get](#Get)
     - [Delete](#Delete)
     - [Post](#Post)
     - [Put](#Put)
-    - [View](#View)
-    - [Json](#Json)
-    - [Text](#Text)
-    - [FormUrlencoded](#FormUrlencoded)
-    - [FormData](#FormData)
-    - [Other](#Other)
-    - [Prefix](#Prefix)
+    - [Patch](#Patch)
+    - [Type](#Type)
+    - [Middleware](#Middleware)
     - [Mapping](#Mapping)
     - [Summary](#Summary)
+  - [Router](#Router)
   - [Model](#Model)
     - [Model](#Model)
-    - [ModelResult](#ModelResult)
     - [Declare](#Declare)
     - [Required](#Required)
     - [TypeCheck](#TypeCheck)
     - [ArrayCheck](#ArrayCheck)
     - [StringLength](#StringLength)
+    - [TypeCustom](#TypeCustom)
   - [Params](#Params)
-    - [Params](#Result)
-    - [Result](#Result)
   - [Jwt](#Jwt)
     - [Jwt](#Jwt)
     - [Protected](#Protected)
   - [Dto](#Dto)
     - [Dto](#Dto)
-    - [DtoCtxExtend](#DtoCtxExtend)
   - [Values](#Values)
     - [MethodType](#MethodType)
     - [DataType](#DataType)
     - [ParamsSource](#ParamsSource)
     - [ParamsType](#ParamsType)
     - [StatusCode](#StatusCode)
-- [Others](#Others)
+- [Other](#Other)
 
-## Installation
+## Install
 
-* Before installation, please download and install Node.js. Node.js version 16.0.0 or higher is required.
+* Before installing, download and install Node.js. Node.js V18.0.0 or later is required.
 
 ### Creating a Tiny Application
 
-* You can create a project based on Tiny using the project template provided by Tiny, which sets up a simple project structure for your reference.
+* To create a Tiny-based project, you can use the project template provided by Tiny. This template sets up a simple project structure for your reference.
 
 ```shell
-npm create koa-tiny <project-name>
+npm create node-tiny <project-name>
 ```
 
-### Install Tiny in an existing project
+### Installing Tiny in an existing project
 
 ```shell
-npm install --save koa-tiny
+npm install --save node-tiny
 ```
 
 ### View current API information
+* If you use the Tiny template to build your project, you can visit the `/doc.html` address to view the simplest API information.
 
-* If the project is built using Tiny templates, you can access`/doc.html`the address to view the simplest API information
-
-## Usage
+## Use
 
 ### First-time usage example
 
-* File`index.ts`
-
+* File `index.ts`
 ```typescript
-import Tiny, { Controller } from 'koa-tiny';
-import Koa from 'koa';
-import Router from '@koa/router';
+import Tiny from 'node-tiny';
 import { Manager } from '@/controller/manager';
 
-const app = new Koa();
+const { CreateApp, Router } = Tiny;
+
+const tiny = new CreateApp();
 const router = new Router();
 
-// 初始化配置
-Tiny.init({
-  controller: { prefix: '/api/' },
-  jwt: { expiresIn: '4h', jsonwebtoken: jsonwebtoken }
-});
+router.config({ prefix: '/api' });
+router.register(new Manager());
 
-// 连接你的控制器
-Controller.connect<Manager>(new Manager(), router);
-
-app.listen(4000);
+tiny.listen(4000);
 ```
-
-* File`@/controller/manager.ts`
-
+* File `@/controller/manager.ts`
 ```typescript
-import { Json, Summary, Dto, StatusCode, Get } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'node-tiny';
+const { Controller, Summary, Dto, StatusCode, Get } = Tiny;
 
-export class Manager {
+export class Manager extends Controller {
   @Get()
-  @Json()
   @Summary('This is a summary')
-  public async index(ctx: ExtendableContext, next: Next) {
-    ctx.body = new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' });
-    return next();
+  public async index(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
   }
 }
 ```
 
-* `InitOptions`Parameter description
+## API Description
 
+## CreateApp
+
+* Use `Tiny.CreateApp` to create a Tiny application
 ```typescript
-interface InitOptions {
-  // 控制器配置参数
-  controller?: ControllerOptionsInput;
-  // jwt配置参数
-  jwt?: JwtOptionsInput;
+const tiny = new CreateApp();
+```
+* Use `tiny.run` to set the program running content, receiving a request context [Context](#Context) parameter, which is usually configured before `tiny.listen`
+```typescript
+tiny.run = async (context) => {
+  router.work(context);
 }
 ```
 
-* For configuration information of ControllerOptionsInput, see:[Controller](#Controller)
-* For configuration information of JwtOptionsInput, see:[Jwt](#Jwt)
+* Use `tiny.error` to monitor program execution errors
+```typescript
+tiny.error = (err) => {
+  // ToDo
+}
+```
+* Use `tiny.errorCode` and `tiny.errorMsg` to configure the error message, the default is `500` and `Internal Server Error`
+```typescript
+tiny.errorCode = 500
+tiny.errorMsg = 'Internal Server Error'
+```
 
-## API Description
+## Context
+
+* `Context` stores the context information of the entire request, as well as other customized information. The following is the calling process inside `tiny.listen`
+```typescript
+  function listen(...args): Server {
+    const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
+      try {
+        const context = new Context(req, res);
+        this.run(context);
+      } catch (e: FunctionError) {
+        // ...
+      }
+    });
+    return server.listen(...args);
+  }
+```
+
+* `context.req:IncomingMessage`, Request information
+
+* `context.res:ServerResponse`, Response information
+
+* `context.query:ContextQuery`, Request query parameters and path parameters, which also means that the two parameters cannot have the same name. This has been implemented in `router.work` and can be used directly
+```typescript
+type ContextQuery = object | null | undefined;
+```
+
+* `context.body:ContextBody`, the parameters saved in the body, Tiny does not have a built-in body parsing, you can use a third-party library to parse it in the `tiny.run` method
+```typescript
+type ContextBody = object | string | null | undefined;
+```
+
+* `context.params:ContextParams`, the parameters verified by `@Tiny.Param.in` will be automatically filled in and can be used directly
+```typescript
+type ContextParams = object | null | undefined;
+```
+
+* `context.payload:ContextPayload`, the information verified by `Tiny.Jwt` will be automatically filled in after using the `@Protected` decorator and can be used directly
+```typescript
+type ContextPayload = object | string | null | undefined;
+```
+
+* `context.payload:ContextFiles`, expandable file information, not set inside `Tiny`, after using the `@Protected` decorator, it will be automatically filled in and can be used directly
+```typescript
+type ContextFiles = any[] | null | undefined;
+```
+
+* `context.extend:ContextExtend`, other information that can be expanded
+```typescript
+type ContextExtend = object;
+```
+
+* `context.cookie:CookieManager`, cookie management tool, can be used directly
+```typescript
+interface CookieManager {
+  // Get a cookie by name
+  get(name: string): string | undefined;
+  // Setting a cookie
+  set(name: string, value: string, options: CookieOptions = {}): void;
+  // Deleting a cookie
+  delete(name: string, options: CookieOptions = {}): void
+}
+```
+
+* `context.send<T = Dto>(code: number, data: T, type?: DataType)`, send request information
+```typescript
+context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
+```
+
+* `context.setQuery(query: ContextQuery)`, set the address parameter information, which has been implemented in router.work and can be used directly
+
+* `context.setBody(body: ContextBody)`, set body parameter information, Tiny does not have built-in body parsing, use a third-party library for parsing in the tiny.run method
+```typescript
+tiny.run = async (context) => {
+  await bodyHandler(context); // Third-party body parsing library
+  router.work(context);
+};
+```
+
+* `context.setParams(params: ContextParams)`, set the validation parameter information, after using the `Params.in` decorator, it will be automatically filled in and can be used directly
+```typescript
+class Manager extends Controller {
+  @Post()
+  @Type()
+  @Params.in(HomeIndexInput, ParamsSource.body)
+  getParams(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: context.params, msg: 'success' }));
+  }
+}
+```
+
+* `context.setPayload(payload: ContextPayload)`, set the Jwt verification information, after using the `@Protected` decorator, it will be automatically filled in and can be used directly
+
+```typescript
+class Manager extends Controller {
+  @Post()
+  @Type()
+  @Protected()
+  jwtVerify(context) {
+    context.send(StatusCode.success, new Dto({code: StatusCode.success, result: context.payload, msg: 'success'}));
+  }
+}
+```
+
+* `context.setFiles(files: ContextFiles)`, set file information
+
+* `context.setExtend<T>(name: string, value: T)`, set extended information
 
 ### Controller
 
 #### Controller
-
-* Usage`Controller.connect<T>(instance: T, router: Router)`Controller class for connecting to the system
-
+* All controllers should inherit from the `Controller` class
 ```typescript
-// 连接你的控制器
-Controller.connect<Manager>(new Manager(), router);
-```
+import Tiny from 'node-tiny';
+const { Controller, Summary, Dto, StatusCode, Get } = Tiny;
 
-* Usage`Controller.options: ControllerOptionsInput`Get controller configuration items
-
-```typescript
-// 打印配置
-console.log(Controller.options)
-
-// 配置类型
-type ControllerOptionsInput = {
-  // API前缀-全局，默认：''
-  prefix?: string;
-  // 是否是驼峰，默认：false
-  hump?: boolean;
-};
-```
-
-* Usage`Controller.apiInfoJson`Get JSON information of the API
-
-```typescript
-// 打印JSON信息
-console.log(Controller.apiInfoJson)
-```
-
-* Usage`Controller.jwtProtectedList`Get the list of routes protected by JWT
-
-```typescript
-// 打印列表信息
-console.log(Controller.jwtProtectedList)
+export class Manager extends Controller {
+  @Get()
+  @Summary('This is a summary')
+  public async index(context) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
+  }
+}
 ```
 
 #### Get
 
-* Usage`@Get()`Decorator to declare a Get method
-
+* Use the `@Get()` decorator to declare a Get method
 ```typescript
-import { Get } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Get()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'node-tiny';
+export class Manager extends Controller {
+  @Tiny.Get()
+  public async index(context) {
     // ...
   }
 }
@@ -205,15 +280,12 @@ export class Manager {
 
 #### Delete
 
-* Usage`@Delete()`Decorator to declare a Delete method
-
+* Use the `@Delete()` decorator to declare a Delete method
 ```typescript
-import { Delete } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Delete()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'node-tiny';
+export class Manager extends Controller {
+  @Tiny.Delete()
+  public async index(context) {
     // ...
   }
 }
@@ -221,15 +293,12 @@ export class Manager {
 
 #### Post
 
-* Usage`@Post()`Decorator to declare a Post method
-
+* Use the `@Post()` decorator to declare a Post method
 ```typescript
-import { Post } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'node-tiny';
+export class Manager extends Controller {
+  @Tiny.Post()
+  public async index(context) {
     // ...
   }
 }
@@ -237,133 +306,63 @@ export class Manager {
 
 #### Put
 
-* Usage`@Put()`Decorator to declare a Put method
-
+* Use the `@Put()` decorator to declare a Put method
 ```typescript
-import { Put } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Put()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'node-tiny';
+export class Manager extends Controller {
+  @Tiny.Put()
+  public async index(context) {
     // ...
   }
 }
 ```
 
-#### View
+#### Patch
 
-* Usage`@View()`Decorator to declare a View method
-
+* Use the `@Patch()` decorator to declare a Patch method
 ```typescript
-import { View } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @View()
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'node-tiny';
+export class Manager extends Controller {
+  @Tiny.Patch()
+  public async index(context) {
     // ...
   }
 }
 ```
 
-#### Json
+#### Type
 
-* Usage`@Json(handler?: Router.Middleware)`Decorator, declare the data type of the Body
+* Use `@Type(requestType?: DataType, responseType?: DataType)` to declare the request/response content type, which defaults to the `DataType.json` type
 
 ```typescript
-import { Post, Json } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'node-tiny';
 
-export class Manager {
-  @Post()
-  @Json()
-  public async index(ctx: ExtendableContext, next: Next) {
+export class Manager extends Controller {
+  @Tiny.Patch()
+  @Tiny.Type(DataType.formData, DataType.formData)
+  public async index(context) {
     // ...
   }
 }
 ```
 
-#### Text
+#### Middleware
 
-* Usage`@Text(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
+* Use `@Middleware(handler: ContextAsyncHandler)` to set middleware for the controller
 ```typescript
-import { Post, Text } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @Text()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
+import Tiny from 'node-tiny';
+function execMiddleware(context, next) {
+  if(context.extend.a) {
+    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'middleware', msg: 'success' }));
+  } else {
+    next();
   }
 }
-```
 
-#### FormUrlencoded
-
-* Usage`@FormUrlencoded(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
-```typescript
-import { Post, FormUrlencoded } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @FormUrlencoded()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
-  }
-}
-```
-
-#### FormData
-
-* Usage`@FormData(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
-```typescript
-import { Post, FormData } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @FormData()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
-  }
-}
-```
-
-#### Other
-
-* Usage`@Other(handler?: Router.Middleware)`Decorator, declare the data type of the Body
-
-```typescript
-import { Post, Other } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @Other()
-  public async index(ctx: ExtendableContext, next: Next) {
-    // ...
-  }
-}
-```
-
-#### Prefix
-
-* Usage`@Prefix(text: string)`Decorator, set the prefix for a single route
-
-```typescript
-import { Post, Prefix } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @Prefix('/test/')
-  public async index(ctx: ExtendableContext, next: Next) {
+export class Manager extends Controller {
+  @Tiny.Patch()
+  @Tiny.Middleware(execMiddleware)
+  public async index(context) {
     // ...
   }
 }
@@ -371,16 +370,13 @@ export class Manager {
 
 #### Mapping
 
-* Usage`@Mapping(path: string)`Decorator, reset the route address
-
+* Use the `@Mapping(path: string)` decorator to reset the routing address
 ```typescript
-import { Post, Prefix } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
-  @Prefix('/manager/test/:id')
-  public async index(ctx: ExtendableContext, next: Next) {
+import Tiny from 'node-tiny';
+export class Manager extends Controller {
+  @Tiny.Patch()
+  @Mapping('/manager/test/:id')
+  public async index(context) {
     // ...
   }
 }
@@ -388,27 +384,82 @@ export class Manager {
 
 #### Summary
 
-* Usage`@Summary(text: string)`Decorator, set the description for the method
-
+* Use the `@Summary(text: string)` decorator to set the description document for the method
 ```typescript
-import { Post, Summary } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-
-export class Manager {
-  @Post()
+import Tiny from 'node-tiny';
+export class Manager extends Controller {
+  @Tiny.Patch()
   @Summary('测试方法')
-  public async index(ctx: ExtendableContext, next: Next) {
+  public async index(context) {
     // ...
   }
 }
+```
+
+## Router
+
+* Use `Router` to create a router instance
+
+```typescript
+const router = new Router()
+```
+
+* `router.options:ConnectOptions` is the routing configuration item
+```typescript
+type ConnectOptions = {
+  prefix?: string;
+  format?: boolean;
+};
+```
+
+* `router.apiJSON:RouterApiJson[]` is the api configuration JSON information, which can be used to generate API documentation
+```typescript
+type RouterApiJson = {
+  module: string;
+  describe?: string;
+  func: string;
+  path: string;
+  method: string;
+  requestType?: string;
+  responseType?: string;
+  summary?: string;
+  paramsModel?: object;
+  resultModel?: object;
+};
+```
+
+* `router.routes:RoutesList` is the configured route list
+```typescript
+type RouteItem = { path: string; method: MethodType; handler: Function };
+type RouteValue = {
+  REG: RouteItem[];
+  [path: string]: RouteItem | RouteItem[];
+};
+type RoutesList = {
+  GET: RouteValue;
+  POST: RouteValue;
+  PUT: RouteValue;
+  PATCH: RouteValue;
+  DELETE: RouteValue;
+};
+```
+
+* `router.config(options: ConnectOptions)`Set routing configuration items
+
+* `router.notFound(context: ContextBase)`The route is not found, triggering a 404 error
+
+* `router.work(context: ContextBase)`Routing starts
+
+* `router.register(controller: Controller)`Registering Routes
+```typescript
+router.register(new Manager());
 ```
 
 ## Model
 
 #### Model
 
-* Usage`model<Model>.fill(map: object)`Fill data model
-
+* Use `model<Model>.fill(map: object)` to fill the data model
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -425,21 +476,18 @@ if(result.valid) {
 }
 ```
 
-* Usage`model<Model>.getConfigCache`Get current model configuration
-
+* Use `model<Model>.getConfigCache` to get the current model configuration
 ```typescript
-const input = new LoginInput();
-console.log(input.getConfigCache())
+new LoginInput().getConfigCache();
 ```
 
 ##### ModelResult
 
-* Usage`new ModelResult(valid: boolean, message?: string, value?: any)`Set model validation result
+* Use `new ModelResult(valid: boolean, message?: string, value?: any)` to set the model validation result
 
 #### Declare
 
-* Usage`@Declare(description?: string)`Decorator, declare parameters, note: model parameters must be used at least`Declare`
-
+* Use the `@Declare(description?: string)` decorator to declare parameters. Note: Model parameters must use at least `Declare`
 ```typescript
 class LoginInput extends Model {
   @Declare()
@@ -449,50 +497,62 @@ class LoginInput extends Model {
 
 #### Required
 
-* Usage`@Required(message?: string)`Decorator, set properties must
-
+* Use the `@Required(message?: string)` decorator to set the property to be required
 ```typescript
 class LoginInput extends Model {
   @Declare()
-  @Required('名称不能唯空')
+  @Required('The name cannot be empty')
   name!: string;
 }
 ```
 
 #### TypeCheck
 
-* Usage`@TypeCheck(type: ParamsType | T, message?: string)`Decorator, set type checking
-
+* Use the `@TypeCheck(type: ParamsType | T, message?: string)` decorator to set type checking
 ```typescript
 class LoginInput extends Model {
   @Declare()
-  @TypeCheck(ParamsType.string, '名称只能为字符串')
+  @TypeCheck(ParamsType.string, 'The name can only be a string')
   name!: string;
 }
 ```
 
 #### ArrayCheck
 
-* Usage`@ArrayCheck(type: ParamsType | T, message?: string, maxLength?: number)`Decorator, set array type checking, precondition is`TypeCheck`Set`ParamsType.array`
-
+* Use the `@ArrayCheck(type: ParamsType | T, message?: string, maxLength?: number, maxLengthMessage?: string)` decorator to set array type checking. The precondition is to set `TypeCheck` to `ParamsType.array`
 ```typescript
 class LoginInput extends Model {
   @Declare()
-  @TypeCheck(ParamsType.array, '列表只能为数组')
-  @ArrayCheck(ParamsType.string, '数组内容只能为字符串')
+  @TypeCheck(ParamsType.array, 'Lists can only be arrays')
+  @ArrayCheck(ParamsType.string, 'The array content can only be strings')
   list!: string[];
 }
 ```
 
 #### StringLength
 
-* Usage`@StringLength(range: number[], message?: string)`Decorator, set string length validation, precondition is`TypeCheck`Set`ParamsType.string`
-
+* Use the `@StringLength(range: number[], message?: string)` decorator to set the string length check. The prerequisite is to set `TypeCheck` to `ParamsType.string`
 ```typescript
 class LoginInput extends Model {
   @Declare()
-  @TypeCheck(ParamsType.string, '名称只能为字符串')
-  @StringLength([1,50], '名称长度只能为1-50')
+  @TypeCheck(ParamsType.string, 'The name can only be a string')
+  @StringLength([1,50], 'The name length can only be 1-50')
+  name!: string;
+}
+```
+
+#### TypeCustom
+
+* Use the `@TypeCustom<T>(valid: (value: T) => ModelResult)` decorator to set custom validation content and return a `ModelResult`
+```typescript
+class LoginInput extends Model {
+  @Declare()
+  @TypeCustom((value) => {
+    if(value) {
+      // ...
+    }
+    return new Tiny.ModelResult(true,'', value);
+  })
   name!: string;
 }
 ```
@@ -501,11 +561,10 @@ class LoginInput extends Model {
 
 #### Params
 
-* Usage`@Params<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, handler?: <P1, P2>(p1: P1, p2: P2) => T)`Decorator, set input parameter validation
-
+* Use the `@Params.in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true)` decorator to set parameter validation
 ```typescript
-import { Post, Params } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'node-tiny';
+const { Controller, Post, Params } = Tiny;
 
 class LoginInput extends Model {
   @Declare()
@@ -515,24 +574,20 @@ class LoginInput extends Model {
   password!: string;
 }
 
-export class Manager {
+export class Manager extends Controller {
   @Post()
-  @Params(LoginInput, ParamsSource.body)
-  public async index(ctx: ExtendableContext, next: Next, extend: DtoCtxExtend<LoginInput, null>) {
-    console.log(extend.params.name)
-    console.log(extend.params.password)
+  @Params.in(LoginInput, ParamsSource.body)
+  public async index(context) {
+    console.log(context.params.name)
+    console.log(context.params.password)
     // ...
   }
 }
 ```
-
-#### Result
-
-* Usage`@Result<T extends Model>(result: { new (): T })`Decorator, set output parameter type
-
+* Use the `@Params.out<T extends Model>(result: { new (): T })` decorator to set the output parameter type
 ```typescript
-import { Post, Params, Dto, StatusCode } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
+import Tiny from 'node-tiny';
+const { Controller, Post, Params, Dto, StatusCode } = Tiny;
 
 class LoginOut extends Model {
   @Declare()
@@ -542,14 +597,14 @@ class LoginOut extends Model {
   name!: string;
 }
 
-export class Manager {
+export class Manager extends Controller {
   @Post()
-  @Result(LoginOut)
-  public async index(ctx: ExtendableContext, next: Next) {
+  @Params.out(LoginOut)
+  public async index(context) {
     // ...
     const info = new LoginOut();
     info.fill({...});
-    ctx.body = new Dto({ code: StatusCode.success, result: info, msg: 'success' });
+    // ...
   }
 }
 ```
@@ -558,68 +613,44 @@ export class Manager {
 
 #### Jwt
 
-* Usage`Jwt.sign<T>(ctx: ExtendableContext, payload: T)`Generate token
-
+* Configure `Jwt.sign = <Payload = object>(context: ContextBase, payload: Payload) => string | null | undefined;`Generate token
 ```typescript
-Jwt.sign<JwtPayload>(ctx, {...});
-```
-
-* Usage`Jwt.verify<T>(ctx: ExtendableContext): T | null`Validate token
-
-```typescript
-const payload = Jwt.verify(ctx);
-```
-
-* Usage`Jwt.options`Get controller configuration items
-
-```typescript
-// 打印配置
-console.log(Jwt.options)
-
-// 配置信息
-type JwtOptionsInput = {
-  // jsonwebtoken类，详见：https://github.com/auth0/node-jsonwebtoken
-  jsonwebtoken: {
-    verify: Function;
-    sign: Function;
-  };
-  // 私钥key，默认：'shared-secret'
-  privateKey?: string;
-  // 算法名称，默认：HS256
-  algorithms?: string;
-  // 过期时间，默认：24h
-  expiresIn?: string;
-  // 不验证令牌的过期时间，默认：false
-  ignoreExpiration?: boolean;
-  // 验证不通过返回的错误码，默认：408
-  errorCode?: number;
-  // 验证不通过返回的错误信息，默认：Unauthorized access
-  errorMsg?: string;
-  // 保存token的key：'token'
-  tokenKey?: string;
-  // 自定义获取token的方法
-  getToken?: (ctx: ExtendableContext) => string | undefined;
-  // 自定义设置token的方法
-  setToken?: (ctx: ExtendableContext, value: string) => any;
-  // 自定义是否重置token
-  isResetToken?: (ctx: ExtendableContext) => boolean;
+Jwt.sign = (context, payload) => {
+  context.cookie.set('token', JSON.stringify(payload));
+  return JSON.stringify(payload);
 };
+```
+* Configure `Jwt.verify = (context: ContextBase, next: () => any) => any;` to verify the token
+```typescript
+Jwt.verify = (context, next) => {
+  const token = context.cookie.get('token');
+  if (token) {
+    context.setPayload(getJSON(token));
+    next();
+  } else {
+    Jwt.refuse(context);
+  }
+}
+```
+* Configure `Jwt.refuse = (context: ContextBase) => any;` to handle verification failure. The default is as follows
+```typescript
+Jwt.refuse = (context, next) => {
+  context.send(StatusCode.success, new Dto({ code: StatusCode.authError, msg: 'No permission to access temporarily', result: null }));
+}
 ```
 
 #### Protected
 
-* Usage`@Protected()`Decorator, the configured method will perform JWT validation
-
+* Use the `@Protected()` decorator, the configured method will be `Jwt` verified
 ```typescript
-import { Post, Protected } from 'koa-tiny';
-import { ExtendableContext, Next } from 'koa';
-import { YouPayload } from '....'
+import Tiny  from 'node-tiny';
+const { Controller, Post, Protected } = Tiny;
 
-export class Manager {
+export class Manager extends Controller {
   @Post()
   @Protected()
-  public async index(ctx: ExtendableContext, next: Next, extend: DtoCtxExtend<null, YouPayload>) {
-    console.log(extend.payload)
+  public async index(context) {
+    console.log(context.payload)
     // ...
   }
 }
@@ -629,36 +660,34 @@ export class Manager {
 
 #### Dto
 
-* Usage`new Dto({ code: number | string, result?: any, msg?: string })`Set Response return code
-
-#### DtoCtxExtend
-
-* Usage`new DtoCtxExtend<P1,P2>({ params: P1, payload: P2 })`Set ctx additional parameters (for internal use in Tiny)
+* Use `new Dto({ code: number | string, result?: any, msg?: string })` to set the Response return code
 
 ### Values
 
 #### MethodType
 
-* Request type
-
+* Method Type
 ```typescript
 export enum MethodType {
-  get = 'get',
-  delete = 'delete',
-  post = 'post',
-  put = 'put',
-  view = 'view'
+  head = 'HEAD',
+  options = 'OPTIONS',
+  get = 'GET',
+  delete = 'DELETE',
+  post = 'POST',
+  put = 'PUT',
+  patch = 'PATCH'
 }
 ```
 
 #### DataType
 
-* Data structure type of the body
-
+* The data structure type of body
 ```typescript
 export enum DataType {
   json = 'application/json',
   text = 'text/plain',
+  html = 'text/html',
+  xml = 'text/xml',
   formUrlencoded = 'application/x-www-form-urlencoded',
   formData = 'multipart/form-data',
   other = 'other'
@@ -668,7 +697,6 @@ export enum DataType {
 #### ParamsSource
 
 * Parameter source
-
 ```typescript
 export enum ParamsSource {
   query = 'query',
@@ -678,8 +706,7 @@ export enum ParamsSource {
 
 #### ParamsType
 
-* Parameter data type
-
+* Parameter Data Type
 ```typescript
 export enum ParamsType {
   number = 'number',
@@ -691,15 +718,18 @@ export enum ParamsType {
 
 #### StatusCode
 
-* Response status value
-
+* Response Status Code
 ```typescript
 export const StatusCode = {
   success: 200,
   paramsError: 400,
-  authError: 408,
+  authError: 401,
+  notFound: 404,
+  timeout: 408,
   serveError: 500
 };
 ```
 
-## Others
+## Other
+
+
