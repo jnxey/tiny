@@ -22,7 +22,8 @@ export class Params {
     return function (_, __, descriptor: PropertyDescriptor) {
       const next: Function = descriptor.value;
       const _params = new params();
-      descriptor.value.PARAMS_MODEL = _params.getConfigCache();
+      descriptor.value.PARAMS_IN_MODEL = _params.getConfigCache();
+      descriptor.value.PARAMS_IN_TYPE = type;
       if (!validate) return;
       descriptor.value = function (context: ContextBase) {
         const params = type === ParamsSource.body ? context.body : context.query;
@@ -44,7 +45,7 @@ export class Params {
   public static out<T extends Model>(result: { new (): T }): Function {
     return function (_, __, descriptor: PropertyDescriptor) {
       const _result = new result();
-      descriptor.value.RESULT_MODEL = _result.getConfigCache();
+      descriptor.value.PARAMS_OUT_MODEL = _result.getConfigCache();
     };
   }
 }

@@ -1,4 +1,4 @@
-import { DataType, MethodType } from '@/values';
+import { DataType, MethodType, ParamsType } from '@/values';
 
 export type ConnectOptions = {
   prefix?: string;
@@ -16,6 +16,7 @@ export type ControllerApiJson = {
   summary?: string;
   paramsModel?: object;
   resultModel?: object;
+  paramsInType?: string;
 };
 
 export interface ConnectResult {
@@ -35,6 +36,7 @@ export interface ControllerHandler {
   SUMMARY?: string;
   JWT_PROTECTED?: boolean;
   HANDLER?: Function;
-  PARAMS_MODEL?: object;
-  RESULT_MODEL?: object;
+  PARAMS_IN_MODEL?: object;
+  PARAMS_IN_TYPE?: ParamsType;
+  PARAMS_OUT_MODEL?: object;
 }

@@ -38,8 +38,9 @@ export class Controller {
           requestType: handler.REQUEST_TYPE ?? DataType.json,
           responseType: handler.RESPONSE_TYPE ?? DataType.json,
           summary: handler.SUMMARY,
-          paramsModel: handler.PARAMS_MODEL,
-          resultModel: handler.RESULT_MODEL
+          paramsModel: handler.PARAMS_IN_MODEL,
+          resultModel: handler.PARAMS_OUT_MODEL,
+          paramsInType: handler.PARAMS_IN_TYPE
         }
       });
     });
