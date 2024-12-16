@@ -8,7 +8,7 @@ import { Router } from '@/router';
 import { Context } from '@/context';
 import http, { IncomingMessage, ServerResponse } from 'http';
 import { ContextBase } from '@/context/types';
-import { FunctionArgs, FunctionError } from '@/types';
+import { FunctionArgs } from '@/types';
 import { Server } from 'net';
 import { isFunction } from '@/tools';
 
@@ -30,7 +30,7 @@ class CreateApp {
   /*
    * Internal error in monitoring controller
    */
-  public error?: (err: FunctionError) => any = () => {};
+  public error?: (err: Error | unknown) => any = () => {};
 
   /*
    * Create service port
@@ -40,7 +40,7 @@ class CreateApp {
       try {
         const context = new Context(req, res);
         this.run(context);
-      } catch (e: FunctionError) {
+      } catch (e: Error | unknown) {
         res.statusCode = this.errorCode;
         res.end(this.errorMsg);
         if (this.error && isFunction(this.error)) this.error(e);
