@@ -131,7 +131,7 @@ tiny.run = async (context) => {
 }
 ```
 
-* Use `tiny.error` to monitor program execution errors
+* Use `tiny.error` to monitor program execution errors, use `context.error` to trigger the execution of `tiny.error`
 ```typescript
 tiny.error = (err) => {
   // ToDo

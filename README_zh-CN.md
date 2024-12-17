@@ -131,7 +131,7 @@ tiny.run = async (context) => {
 }
 ```
 
-* 使用`tiny.error`监听程序执行过程报错
+* 使用`tiny.error`监听程序执行过程报错，使用`context.error`可以触发`tiny.error`的执行
 ```typescript
 tiny.error = (err) => {
   // ToDo
