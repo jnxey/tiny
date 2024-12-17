@@ -1,5 +1,5 @@
 import { ModelConfigCache, ParamsType } from '@/values';
-import { isArray, isBoolean, isDate, isEmpty, isString } from '@/tools';
+import { isArray, isBoolean, isDate, isEmpty, isObject, isString } from '@/tools';
 import { ModelConfig } from '@/model/types';
 
 /*
@@ -77,6 +77,7 @@ export class Model {
 
   // Fill in data based on type
   public fill<T = object>(map: T): ModelResult {
+    if (!isObject(map)) return new ModelResult(false, 'fail');
     const modelConfig = this.constructor[ModelConfigCache];
     if (!modelConfig) return new ModelResult(true);
     for (let name in modelConfig) {

@@ -26,8 +26,11 @@ export interface ContextBase {
   payload: ContextPayload;
   files: ContextFiles;
   cookie: CookieManager;
+  error: Function;
 
   send<T = Dto>(code: number, data: T, type?: DataType): void;
+
+  setError(error: Function): void;
 
   setQuery(query: ContextQuery): void;
 

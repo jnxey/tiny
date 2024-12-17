@@ -8,6 +8,8 @@
 
 * Tiny was born out of the problem of asynchronous code confusion that is prone to occur during Node development. Unlike other frameworks, it restricts the use of asynchronous middleware. It is usually recommended to only use the `@Middleware` decorator on the controller method for setting. Its advantage is that it will not make the asynchronous code too confusing, but its disadvantage is that it is not flexible enough.
 
+* It is usually recommended to use async only when it comes to `@Middleware`, `@Jwt`, and `tiny.run` execution. Tiny has built-in corresponding error handling. If async is used elsewhere, the errors need to be handled by yourself.
+
 ## Environment
 
 ![NODE Version][node-image]
@@ -204,6 +206,8 @@ interface CookieManager {
 }
 ```
 
+* `context.error:Function`, Errors during execution can be thrown to `tiny.error` for processing
+
 * `context.send<T = Dto>(code: number, data: T, type?: DataType)`, send request information
 ```typescript
 context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
@@ -384,12 +388,12 @@ export class Manager extends Controller {
 
 #### Summary
 
-* Use the `@Summary(text: string)` decorator to set the description document for the method
+* Use the `@Summary(summary?: string, describe?: string)` decorator to set the description document for the method
 ```typescript
 import Tiny from 'node-tiny';
 export class Manager extends Controller {
   @Tiny.Patch()
-  @Summary('测试方法')
+  @Summary('Test Method')
   public async index(context) {
     // ...
   }

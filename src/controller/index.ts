@@ -1,4 +1,4 @@
-import { copyAttrToNew, kebabCase } from '@/tools';
+import { asyncError, copyAttrToNew, kebabCase } from '@/tools';
 import { ConnectOptions, ConnectResult, ControllerHandler } from '@/controller/types';
 import { DataType, MethodType } from '@/values';
 import { ContextAsyncHandler, ContextBase } from '@/context/types';
@@ -108,7 +108,7 @@ export function Middleware<P1, P2 extends Function>(handler: ContextAsyncHandler
   return function (_, __, descriptor: PropertyDescriptor) {
     const next: Function = descriptor.value;
     descriptor.value = function (context: ContextBase) {
-      handler.call(this, context, next.bind(this, context));
+      asyncError(handler.call(this, context, next.bind(this, context)), context.error);
     };
     copyAttrToNew(descriptor.value, next);
   };

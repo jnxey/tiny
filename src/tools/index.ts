@@ -21,7 +21,16 @@ export const isEmpty = (value: any): boolean => value === undefined || value ===
  * Throwing an error
  */
 export function warn(msg: string) {
-  throw new Error(msg);
+  throw new Error(String(msg));
+}
+
+/**
+ * Catch error
+ */
+export function asyncError(result: any, warn: Function = function () {}) {
+  if (isFunction(result?.catch)) {
+    result.catch((err) => warn(err));
+  }
 }
 
 /**

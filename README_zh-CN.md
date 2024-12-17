@@ -8,6 +8,8 @@
 
 * Tiny的诞生源于在Node开发过程中容易出现异步代码混乱问题，和其他框架不同，它对异步中间件的使用进行了限制，通常建议只在控制器的方法上使用`@Middleware`装饰器进行设置，它的优点是不会让异步代码太过于混乱，缺点是不够灵活。
 
+* 通常建议只在涉及到`@Middleware`，`@Jwt`，`tiny.run`的执行时使用异步，Tiny内置了对应的错误处理，若在其他地方使用异步，其错误需自行处理。
+
 ## 环境
 
 ![NODE Version][node-image]
@@ -204,6 +206,8 @@ interface CookieManager {
 }
 ```
 
+* `context.error:Function`，可将执行过程的错误抛至`tiny.error`进行处理
+
 * `context.send<T = Dto>(code: number, data: T, type?: DataType)`，发送请求信息
 ```typescript
 context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'hello word', msg: 'success' }));
@@ -384,7 +388,7 @@ export class Manager extends Controller {
 
 #### Summary
 
-* 使用`@Summary(text: string)`装饰器，给方法设置说明文档
+* 使用`@Summary(summary?: string, describe?: string)`装饰器，给方法设置说明文档
 ```typescript
 import Tiny from 'node-tiny';
 export class Manager extends Controller {

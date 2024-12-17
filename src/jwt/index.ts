@@ -1,4 +1,4 @@
-import { copyAttrToNew } from '@/tools';
+import { asyncError, copyAttrToNew } from '@/tools';
 import { JwtRefuse, JwtSign, JwtVerify } from '@/jwt/types';
 import { ContextBase } from '@/context/types';
 import { JwtVerifyRefuse, StatusCode } from '@/values';
@@ -34,7 +34,7 @@ export function Protected(): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
     const next: Function = descriptor.value;
     descriptor.value = function (context: ContextBase) {
-      Jwt.verify.call(this, context, next.bind(this, context));
+      asyncError(Jwt.verify.call(this, context, next.bind(this, context)), context.error);
     };
     copyAttrToNew(descriptor.value, next);
   };

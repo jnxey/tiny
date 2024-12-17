@@ -10,7 +10,7 @@ import http, { IncomingMessage, ServerResponse } from 'http';
 import { ContextBase } from '@/context/types';
 import { FunctionArgs } from '@/types';
 import { Server } from 'net';
-import { isFunction } from '@/tools';
+import { asyncError, isFunction, warn } from '@/tools';
 
 class CreateApp {
   /*
@@ -37,13 +37,17 @@ class CreateApp {
    */
   public listen(...args: FunctionArgs): Server {
     const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
-      try {
-        const context = new Context(req, res);
-        this.run(context);
-      } catch (e: Error | unknown) {
+      const handlerError = (e) => {
         res.statusCode = this.errorCode;
         res.end(this.errorMsg);
         if (this.error && isFunction(this.error)) this.error(e);
+      };
+      try {
+        const context = new Context(req, res);
+        context.setError(handlerError);
+        asyncError(this.run(context), context.error);
+      } catch (e: Error | unknown) {
+        handlerError(e);
       }
     });
     return server.listen(...args);
@@ -51,6 +55,49 @@ class CreateApp {
 }
 
 const Tiny = {
+  // CreateApp
+  CreateApp,
+  // context
+  Context,
+  // controller
+  Controller,
+  Get,
+  Delete,
+  Post,
+  Put,
+  Patch,
+  Type,
+  Middleware,
+  Mapping,
+  Summary,
+  // router
+  Router,
+  // jwt
+  Jwt,
+  Protected,
+  // dto
+  Dto,
+  // model
+  Model,
+  ModelResult,
+  Declare,
+  Required,
+  TypeCheck,
+  StringLength,
+  ArrayCheck,
+  TypeCustom,
+  // params
+  Params,
+  // values
+  MethodType,
+  DataType,
+  ParamsSource,
+  ParamsType,
+  StatusCode,
+  ModelConfigCache
+};
+
+export {
   // CreateApp
   CreateApp,
   // context
