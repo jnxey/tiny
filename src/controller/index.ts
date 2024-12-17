@@ -10,11 +10,9 @@ export class Controller {
    */
   public connect(options: ConnectOptions): ConnectResult[] {
     const constructorName = 'constructor';
-    const moduleDescribeName = 'MODULE_DESCRIBE';
     const constructor = this[constructorName];
     const connector = '/';
     const moduleName: string = constructor.name;
-    const describe: string = constructor[moduleDescribeName];
     const methods: string[] = Object.getOwnPropertyNames(constructor.prototype);
     const result: ConnectResult[] = [];
     methods.forEach((name) => {
@@ -31,30 +29,21 @@ export class Controller {
         handler: handler,
         options: {
           module: module,
-          describe: describe,
           func: func,
           path: path,
           method: handler.METHOD,
           requestType: handler.REQUEST_TYPE ?? DataType.json,
           responseType: handler.RESPONSE_TYPE ?? DataType.json,
           summary: handler.SUMMARY,
-          paramsModel: handler.PARAMS_IN_MODEL,
-          resultModel: handler.PARAMS_OUT_MODEL,
+          describe: handler.DESCRIBE,
+          paramsInModel: handler.PARAMS_IN_MODEL,
+          paramsOutModel: handler.PARAMS_OUT_MODEL,
           paramsInType: handler.PARAMS_IN_TYPE
         }
       });
     });
     return result;
   }
-}
-
-/*
- * Declare the module and add a description
- */
-export function Module(text?: string): Function {
-  return function (target: Function) {
-    target['MODULE_DESCRIBE'] = text;
-  };
 }
 
 /*
@@ -137,8 +126,9 @@ export function Mapping(path: string): Function {
 /*
  * Explain the module method
  */
-export function Summary(text: string): Function {
+export function Summary(summary?: string, describe?: string): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
-    descriptor.value.SUMMARY = text;
+    descriptor.value.SUMMARY = summary;
+    descriptor.value.DESCRIBE = describe;
   };
 }

@@ -14,8 +14,8 @@ export type ControllerApiJson = {
   requestType?: string;
   responseType?: string;
   summary?: string;
-  paramsModel?: object;
-  resultModel?: object;
+  paramsInModel?: object;
+  paramsOutModel?: object;
   paramsInType?: string;
 };
 
@@ -34,6 +34,7 @@ export interface ControllerHandler {
   PREFIX?: string;
   MAPPING?: string;
   SUMMARY?: string;
+  DESCRIBE?: string;
   JWT_PROTECTED?: boolean;
   HANDLER?: Function;
   PARAMS_IN_MODEL?: object;

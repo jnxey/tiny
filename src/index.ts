@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Mapping, Middleware, Module, Post, Put, Patch, Summary, Type } from '@/controller';
+import { Controller, Delete, Get, Mapping, Middleware, Post, Put, Patch, Summary, Type } from '@/controller';
 import { Jwt, Protected } from '@/jwt';
 import { Dto } from '@/dto';
 import { Params } from '@/params';
@@ -57,7 +57,6 @@ const Tiny = {
   Context,
   // controller
   Controller,
-  Module,
   Get,
   Delete,
   Post,
