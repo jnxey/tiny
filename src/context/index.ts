@@ -49,7 +49,7 @@ export class Context implements ContextBase {
   /*
    * `context.perms:string | string[]`，设置权限信息
    */
-  public perms!: string | string[];
+  public perms?: string | string[];
 
   constructor(req: IncomingMessage, res: ServerResponse) {
     this.req = req;
@@ -72,7 +72,7 @@ export class Context implements ContextBase {
   /*
    * `context.setError`，设置报错处理方法
    */
-  setPerms(perms: string | string[]) {
+  setPerms(perms?: string | string[]) {
     this.perms = perms;
   }
 

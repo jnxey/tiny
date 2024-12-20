@@ -30,7 +30,7 @@ export class Jwt {
  * JWT Decorator
  * After using this decorator, JWT verification will be conducted
  */
-export function Protected(perms: string | string[]): Function {
+export function Protected(perms?: string | string[]): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
     const next: Function = descriptor.value;
     descriptor.value = function (context: ContextBase) {
