@@ -27,8 +27,11 @@ export interface ContextBase {
   files: ContextFiles;
   cookie: CookieManager;
   error: Function;
+  perms: string | string[];
 
-  send<T = Dto>(code: number, data: T, type?: DataType): void;
+  send<T = Dto>(data: T, code?: number, type?: DataType): void;
+
+  setPerms(perms: string | string[]): void;
 
   setError(error: Function): void;
 

@@ -22,7 +22,7 @@ export class Jwt {
    * Perform JWT verification refuse
    */
   public static refuse: JwtRefuse = (context: ContextBase) => {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.authError, msg: JwtVerifyRefuse, result: null }));
+    context.send(new Dto(null, StatusCode.authError, JwtVerifyRefuse));
   };
 }
 
@@ -30,10 +30,11 @@ export class Jwt {
  * JWT Decorator
  * After using this decorator, JWT verification will be conducted
  */
-export function Protected(): Function {
+export function Protected(perms: string | string[]): Function {
   return function (_, __, descriptor: PropertyDescriptor) {
     const next: Function = descriptor.value;
     descriptor.value = function (context: ContextBase) {
+      context.setPerms(perms);
       asyncError(Jwt.verify.call(this, context, next.bind(this, context)), context.error);
     };
     copyAttrToNew(descriptor.value, next);

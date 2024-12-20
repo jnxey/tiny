@@ -12,7 +12,7 @@ export class Params {
    * Params in refuse
    */
   static refuse = (context: ContextBase, message: string) => {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.paramsError, msg: message, result: null }));
+    context.send(new Dto(null, StatusCode.paramsError, message));
   };
 
   /*

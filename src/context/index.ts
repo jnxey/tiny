@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { ContextBase, ContextBody, ContextExtend, ContextFiles, ContextParams, ContextPayload, ContextQuery } from '@/context/types';
-import { DataType } from '@/values';
+import { DataType, StatusCode } from '@/values';
 import { Dto } from '@/dto';
 import { CookieManager } from '@/cookie';
 import { isArray, isNumber, isObject, warn } from '@/tools';
@@ -46,6 +46,10 @@ export class Context implements ContextBase {
    * `context.error:Function`，内部报错处理，会触发最顶层的`tiny.error`
    */
   public error!: Function;
+  /*
+   * `context.perms:string | string[]`，设置权限信息
+   */
+  public perms!: string | string[];
 
   constructor(req: IncomingMessage, res: ServerResponse) {
     this.req = req;
@@ -56,13 +60,20 @@ export class Context implements ContextBase {
   /*
    * `context.send`，发送请求信息
    */
-  send<T = Dto>(code: number, data: T, type: DataType = DataType.json) {
+  send<T = Dto>(data: T, code: number = StatusCode.success, type: DataType = DataType.json) {
     this.res.writeHead(Number(code), { 'Content-Type': String(type) });
     if (isObject(data) || isArray(data)) {
       this.res.end(JSON.stringify(data));
     } else {
       this.res.end(String(data));
     }
+  }
+
+  /*
+   * `context.setError`，设置报错处理方法
+   */
+  setPerms(perms: string | string[]) {
+    this.perms = perms;
   }
 
   /*

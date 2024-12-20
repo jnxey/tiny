@@ -48,7 +48,7 @@ export class Router {
    * Trigger 404
    */
   public notFound = (context: ContextBase) => {
-    context.send<string>(StatusCode.notFound, RouterNotFound, DataType.text);
+    context.send<string>(RouterNotFound, StatusCode.notFound, DataType.text);
   };
 
   /*

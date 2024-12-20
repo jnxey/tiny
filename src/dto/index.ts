@@ -1,14 +1,14 @@
-import { DtoInput } from '@/dto/types';
+import { StatusCode } from '@/values';
 
 /*
  * Response Dto
  */
 export class Dto {
-  public code: string | number;
+  public code: number;
   public result: any;
   public msg?: string;
 
-  constructor({ code, result, msg }: DtoInput) {
+  constructor(result: any, code: number = StatusCode.success, msg?: string) {
     this.code = code;
     this.msg = msg;
     this.result = result;
