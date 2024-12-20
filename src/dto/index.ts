@@ -8,7 +8,7 @@ export class Dto {
   public result: any;
   public msg?: string;
 
-  constructor(result: any, code: number = StatusCode.success, msg?: string) {
+  constructor(result: any, code: number = StatusCode.success, msg: string = 'success') {
     this.code = code;
     this.msg = msg;
     this.result = result;
