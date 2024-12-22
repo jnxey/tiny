@@ -44,7 +44,7 @@ export class CookieManager {
   set(name: string, value: string, options: CookieOptions = {}): void {
     const def = {
       path: '/',
-      domain: this.request,
+      domain: null,
       expires: new Date(2999, 1, 1).toUTCString(),
       httpOnly: true,
       secure: true,
