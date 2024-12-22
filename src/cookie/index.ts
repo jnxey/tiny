@@ -44,16 +44,24 @@ export class CookieManager {
    */
   set(name: string, value: string, options: CookieOptions = {}): void {
     const cookieParts = [`${name}=${encodeURIComponent(value)}`];
-    if (options.maxAge) cookieParts.push(`Max-Age=${options.maxAge}`);
+    if (options.maxAge) {
+      cookieParts.push(`Max-Age=${options.maxAge}`);
+    } else {
+      cookieParts.push(`Max-Age=${100 * 365 * 24 * 60 * 60 * 1000}`);
+    }
     if (options.domain) cookieParts.push(`Domain=${options.domain}`);
-    if (options.path) cookieParts.push(`Path=${options.path}`);
+    if (options.path) {
+      cookieParts.push(`Path=${options.path}`);
+    } else {
+      cookieParts.push(`Path=/`);
+    }
     if (options.expires && isDate(options.expires)) {
       cookieParts.push(`Expires=${options.expires.toUTCString()}`);
     } else {
       cookieParts.push(`Expires=${new Date(2299, 1, 1).toUTCString()}`);
     }
-    if (options.httpOnly) cookieParts.push('HttpOnly');
-    if (options.secure) cookieParts.push('Secure');
+    if (options.httpOnly !== false) cookieParts.push('HttpOnly');
+    if (options.secure !== false) cookieParts.push('Secure');
     if (options.sameSite) cookieParts.push(`SameSite=${options.sameSite}`);
     const cookieString = cookieParts.join('; ');
     this.cookies[name] = value;
