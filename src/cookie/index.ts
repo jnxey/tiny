@@ -53,12 +53,14 @@ export class CookieManager {
     if (options.sameSite) cookieParts.push(`SameSite=${options.sameSite}`);
     const cookieString = cookieParts.join('; ');
     this.cookies[name] = value;
-    const oldCookie = this.response.getHeader('Set-Cookie');
-    if (!oldCookie) {
-      this.response.setHeader('Set-Cookie', [cookieString]);
-    } else if (typeof oldCookie === 'object') {
-      this.response.setHeader('Set-Cookie', [...oldCookie, cookieString]);
-    }
+    //
+    this.response.setHeader('Set-Cookie', cookieString);
+    // const oldCookie = this.response.getHeader('Set-Cookie');
+    // if (!oldCookie) {
+    //   this.response.setHeader('Set-Cookie', [cookieString]);
+    // } else if (typeof oldCookie === 'object') {
+    //   this.response.setHeader('Set-Cookie', [...oldCookie, cookieString]);
+    // }
   }
 
   /**
