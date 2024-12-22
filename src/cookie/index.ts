@@ -1,6 +1,5 @@
 import { CookieOptions } from '@/cookie/types';
 import { IncomingMessage, ServerResponse } from 'http';
-import { isDate } from '@/tools';
 
 export class CookieManager {
   public request!: IncomingMessage;
@@ -43,26 +42,24 @@ export class CookieManager {
    * @returns {string} The formatted "Set-Cookie" string.
    */
   set(name: string, value: string, options: CookieOptions = {}): void {
+    const def = {
+      path: '/',
+      domain: this.request,
+      expires: new Date(2999, 1, 1).toUTCString(),
+      httpOnly: true,
+      secure: true,
+      maxAge: 100 * 365 * 24 * 60 * 60 * 1000,
+      sameSite: 'Lax'
+    };
+    const _opts = { ...def, ...options };
     const cookieParts = [`${name}=${encodeURIComponent(value)}`];
-    if (options.maxAge) {
-      cookieParts.push(`Max-Age=${options.maxAge}`);
-    } else {
-      cookieParts.push(`Max-Age=${100 * 365 * 24 * 60 * 60 * 1000}`);
-    }
-    if (options.domain) cookieParts.push(`Domain=${options.domain}`);
-    if (options.path) {
-      cookieParts.push(`Path=${options.path}`);
-    } else {
-      cookieParts.push(`Path=/`);
-    }
-    if (options.expires && isDate(options.expires)) {
-      cookieParts.push(`Expires=${options.expires.toUTCString()}`);
-    } else {
-      cookieParts.push(`Expires=${new Date(2299, 1, 1).toUTCString()}`);
-    }
-    if (options.httpOnly !== false) cookieParts.push('HttpOnly');
-    if (options.secure !== false) cookieParts.push('Secure');
-    if (options.sameSite) cookieParts.push(`SameSite=${options.sameSite}`);
+    if (_opts.maxAge) cookieParts.push(`Max-Age=${_opts.maxAge}`);
+    if (_opts.domain) cookieParts.push(`Domain=${_opts.domain}`);
+    if (_opts.path) cookieParts.push(`Path=${_opts.path}`);
+    if (_opts.expires) cookieParts.push(`Expires=${_opts.expires}`);
+    if (_opts.httpOnly) cookieParts.push('HttpOnly');
+    if (_opts.secure) cookieParts.push('Secure');
+    if (_opts.sameSite) cookieParts.push(`SameSite=${_opts.sameSite}`);
     const cookieString = cookieParts.join('; ');
     this.cookies[name] = value;
     this.response.setHeader('Set-Cookie', cookieString);
