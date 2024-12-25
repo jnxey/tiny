@@ -18,14 +18,14 @@ export class Params {
   /*
    * Params.in Decorator: Intercept and process incoming parameters of the request
    */
-  public static in<T extends Model>(params: { new (): T }, type: ParamsSource, validate: boolean = true, filter?: <P1>(p1: P1) => T) {
+  public static in<T extends Model>(model: { new (): T }, type: ParamsSource, validate: boolean = true, filter?: <P1>(p1: P1) => T) {
     return function (_, __, descriptor: PropertyDescriptor) {
       const next: Function = descriptor.value;
-      const _params = new params();
-      descriptor.value.PARAMS_IN_MODEL = _params.getConfigCache();
+      descriptor.value.PARAMS_IN_MODEL = new model();
       descriptor.value.PARAMS_IN_TYPE = type;
       if (!validate) return;
       descriptor.value = function (context: ContextBase) {
+        const _params = new model();
         const params = type === ParamsSource.body ? context.body : context.query;
         const result: ModelResult = _params.fill(!!filter ? filter(params) : params);
         if (result.valid) {
@@ -42,10 +42,9 @@ export class Params {
   /*
    * Params.out Decorator: Declare the parameters of the response
    */
-  public static out<T extends Model>(result: { new (): T }): Function {
+  public static out<T extends Model>(model: { new (): T }): Function {
     return function (_, __, descriptor: PropertyDescriptor) {
-      const _result = new result();
-      descriptor.value.PARAMS_OUT_MODEL = _result.getConfigCache();
+      descriptor.value.PARAMS_OUT_MODEL = new model();
     };
   }
 }
