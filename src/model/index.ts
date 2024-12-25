@@ -1,5 +1,5 @@
 import { ModelConfigCache, ParamsType } from '@/values';
-import { isArray, isBoolean, isDate, isEmpty, isObject, isString } from '@/tools';
+import { deepClone, isArray, isBoolean, isDate, isEmpty, isObject, isString } from '@/tools';
 import { ModelConfig } from '@/model/types';
 
 /*
@@ -176,6 +176,7 @@ export function TypeCustom<T>(valid: (value: T) => ModelResult): Function {
  * Check if the attribute configuration exists
  */
 function _checkParamsConfigExist(target: any, propertyKey: string) {
-  if (!target.constructor[ModelConfigCache]) target.constructor[ModelConfigCache] = {};
+  if (!target.constructor.hasOwnProperty(ModelConfigCache))
+    target.constructor[ModelConfigCache] = deepClone(target.constructor[ModelConfigCache] ?? {});
   if (!target.constructor[ModelConfigCache][propertyKey]) target.constructor[ModelConfigCache][propertyKey] = {};
 }

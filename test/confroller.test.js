@@ -22,7 +22,7 @@ const {
 } = Tiny;
 
 function execMiddleware(context, next) {
-  context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'middleware', msg: 'success' }));
+  context.send(new Dto('middleware'));
   next();
 }
 
@@ -33,37 +33,37 @@ export class Home extends Controller {
   @Type()
   @Summary('Describe')
   get(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'get', msg: 'success' }));
+    context.send(new Dto('get'));
   }
 
   @Post()
   @Type()
   post(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'post', msg: 'success' }));
+    context.send(new Dto('post'));
   }
 
   @Put()
   @Type()
   put(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'put', msg: 'success' }));
+    context.send(new Dto('put'));
   }
 
   @Delete()
   @Type()
   delete(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'delete', msg: 'success' }));
+    context.send(new Dto('delete'));
   }
 
   @Patch()
   @Type()
   patch(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'patch', msg: 'success' }));
+    context.send(new Dto('patch'));
   }
 
   @Get()
   @Type(DataType.text, DataType.json)
   type(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'type', msg: 'success' }));
+    context.send(new Dto('type'));
   }
 
   @Get()
@@ -75,20 +75,20 @@ export class Home extends Controller {
   @Type(DataType.text, DataType.json)
   @Mapping('/home/mapping/:test')
   mapping(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: context.query?.test, msg: 'success' }));
+    context.send(new Dto(context.query?.test));
   }
 
   @Get()
   @Summary('Summary Test')
   summary(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: 'summary', msg: 'success' }));
+    context.send(new Dto('summary'));
   }
 
   @Post()
   @Type()
   @Params.in(HomeIndexInput, ParamsSource.body)
   params(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: context.params, msg: 'success' }));
+    context.send(new Dto(context.params));
   }
 
   @Post()
@@ -96,13 +96,13 @@ export class Home extends Controller {
   @Params.in(HomeIndexInput, ParamsSource.body)
   jwtSign(context) {
     const token = Jwt.sign(context, { id: 1, name: 'test' });
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: token, msg: 'success' }));
+    context.send(new Dto(token));
   }
 
   @Post()
   @Type()
   @Protected()
   jwtVerify(context) {
-    context.send(StatusCode.success, new Dto({ code: StatusCode.success, result: context.payload, msg: 'success' }));
+    context.send(new Dto(context.payload));
   }
 }

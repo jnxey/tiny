@@ -111,3 +111,22 @@ export function parseRoute(url: string, routePattern: string): object | null {
     return null; // No match found
   }
 }
+
+/**
+ * 深度克隆
+ */
+export function deepClone(json: any) {
+  let obj: any = null;
+  if (isArray(json)) {
+    obj = [];
+    json.forEach((item) => obj?.push(deepClone(item)));
+  } else if (isObject(json)) {
+    obj = {};
+    for (let key in json) {
+      obj[key] = deepClone(json[key]);
+    }
+  } else {
+    return json;
+  }
+  return obj;
+}
